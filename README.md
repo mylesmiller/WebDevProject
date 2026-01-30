@@ -2,20 +2,6 @@
 
 A comprehensive frontend-only React application for managing airport baggage operations with multiple user roles, real-time tracking, and message board communications.
 
-## Overview
-
-This application simulates a complete airport baggage handling system with:
-- 5 distinct user roles (Admin, Airline Staff, Gate Staff, Ground Staff, Passenger)
-- Complete baggage workflow from check-in to aircraft loading
-- Real-time bag tracking with timeline visualization
-- Role-specific message boards for staff communication
-- Data persistence using localStorage
-- All validation rules enforced
-
-**Note:** This is a class project for educational purposes. It uses frontend-only data storage (localStorage) and should not be used in production environments.
-
-## Features
-
 ### Admin Dashboard
 - Add/remove flights with validation
 - Add/remove passengers (one ticket per passenger)
