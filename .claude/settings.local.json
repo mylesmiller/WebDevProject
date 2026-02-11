@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-react-app airport-bag-tracking --timeout 300000)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm start)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command \"Get-Process | Where-Object {$_ProcessName -match ''node|python|java|npm''} | Select-Object ProcessName, Id\")",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(git push)",
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd Claude settings and airport baggage tracking application\n\nIncludes project configuration files and complete React-based airport baggage tracking system with role-based dashboards for admin, airline staff, gate staff, ground staff, and passengers.\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}

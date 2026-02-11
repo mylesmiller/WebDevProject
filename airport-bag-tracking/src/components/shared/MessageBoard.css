@@ -1,0 +1,91 @@
+.message-board {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.message-board h3 {
+  margin: 0 0 1rem 0;
+  color: #f1f5f9;
+  border-bottom: 2px solid #334155;
+  padding-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.messages-container {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: #0f172a;
+  border-radius: 8px;
+  border: 1px solid #334155;
+}
+
+.no-messages {
+  color: #64748b;
+  text-align: center;
+  padding: 2rem;
+}
+
+.message {
+  background: #1e293b;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  border: 1px solid #334155;
+}
+
+.message:last-child {
+  margin-bottom: 0;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.message-author {
+  font-weight: 600;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+}
+
+.message-time {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.message-content {
+  margin: 0;
+  color: #94a3b8;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.message-form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.message-input {
+  flex: 1;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.message-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
