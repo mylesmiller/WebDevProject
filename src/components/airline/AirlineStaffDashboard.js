@@ -3,6 +3,7 @@ import Navbar from '../common/Navbar';
 import useAuth from '../../hooks/useAuth';
 import CheckInPanel from './CheckInPanel';
 import FlightPassengers from './FlightPassengers';
+import BagManagement from './BagManagement';
 import MessageBoard from './MessageBoard';
 import SecurityViolations from './SecurityViolations';
 import '../../styles/dashboard.css';
@@ -34,6 +35,12 @@ const AirlineStaffDashboard = () => {
             Passengers
           </button>
           <button
+            className={`tab ${activeTab === 'bags' ? 'active' : ''}`}
+            onClick={() => setActiveTab('bags')}
+          >
+            Bag Management
+          </button>
+          <button
             className={`tab ${activeTab === 'security' ? 'active' : ''}`}
             onClick={() => setActiveTab('security')}
           >
@@ -50,6 +57,7 @@ const AirlineStaffDashboard = () => {
         <div>
           {activeTab === 'checkin' && <CheckInPanel />}
           {activeTab === 'passengers' && <FlightPassengers />}
+          {activeTab === 'bags' && <BagManagement />}
           {activeTab === 'security' && <SecurityViolations />}
           {activeTab === 'messages' && <MessageBoard />}
         </div>

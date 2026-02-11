@@ -42,15 +42,21 @@ const PassengerDashboard = () => {
             <div>
               <strong>Flight Number:</strong> {flight.flightNumber}
             </div>
-            <div>
-              <strong>Gate:</strong> {flight.gate}
-            </div>
-            <div>
-              <strong>Destination:</strong> {flight.destination}
-            </div>
-            <div>
-              <strong>Departure:</strong> {formatDate(flight.departureTime)}
-            </div>
+            {passenger.status !== 'not-checked-in' && (
+              <div>
+                <strong>Gate:</strong> {flight.gate}
+              </div>
+            )}
+            {flight.destination && (
+              <div>
+                <strong>Destination:</strong> {flight.destination}
+              </div>
+            )}
+            {flight.departureTime && (
+              <div>
+                <strong>Departure:</strong> {formatDate(flight.departureTime)}
+              </div>
+            )}
             <div>
               <strong>Flight Status:</strong>{' '}
               <span className={`status-badge status-${flight.status}`}>

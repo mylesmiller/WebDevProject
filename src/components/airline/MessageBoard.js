@@ -1,43 +1,65 @@
 import React, { useState } from 'react';
 import useAuth from '../../hooks/useAuth';
 import useMessages from '../../hooks/useMessages';
+import usePassengers from '../../hooks/usePassengers';
+import useFlights from '../../hooks/useFlights';
+import FormInput from '../common/FormInput';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
 import { MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
+import { validatePassengerId } from '../../utils/validators';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/dashboard.css';
 
 const MessageBoard = () => {
   const { currentUser } = useAuth();
   const { getAirlineMessages, addMessage } = useMessages();
-  const [content, setContent] = useState('');
-  const [priority, setPriority] = useState(MESSAGE_PRIORITY.NORMAL);
+  const { getPassengerById } = usePassengers();
+  const { getFlightsByAirline } = useFlights();
+  const [passengerId, setPassengerId] = useState('');
+  const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   const messages = getAirlineMessages(currentUser.airline);
+  const flights = getFlightsByAirline(currentUser.airline);
 
-  const handleSubmit = (e) => {
+  const handleSubmitRemovalRequest = (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    if (!content.trim()) {
-      setError('Message content is required');
-      return;
-    }
-
     try {
+      const passenger = getPassengerById(passengerId);
+      if (!passenger) {
+        setError('Passenger not found with this ID');
+        return;
+      }
+
+      // Verify passenger is on this airline's flight
+      const passengerFlight = flights.find(f => f.id === passenger.flightId);
+      if (!passengerFlight) {
+        setError('This passenger is not on a flight for your airline');
+        return;
+      }
+
+      if (!reason.trim()) {
+        setError('Reason for removal is required');
+        return;
+      }
+
+      const messageContent = `PASSENGER REMOVAL REQUEST - Passenger: ${passenger.name} (ID: ${passengerId}), Ticket: ${passenger.ticketNumber}, Flight: ${passengerFlight.flightNumber}. Reason: ${reason.trim()}`;
+
       addMessage(MESSAGE_BOARDS.AIRLINE, {
         author: currentUser.name,
-        airline: currentUser.airline,
-        content: content.trim(),
-        priority
+        airline: 'ADMIN',
+        content: messageContent,
+        priority: MESSAGE_PRIORITY.HIGH
       });
 
-      setSuccess('Message posted successfully');
-      setContent('');
-      setPriority(MESSAGE_PRIORITY.NORMAL);
+      setSuccess('Passenger removal request sent to administrator.');
+      setPassengerId('');
+      setReason('');
     } catch (err) {
       setError(err.message);
     }
@@ -45,44 +67,46 @@ const MessageBoard = () => {
 
   return (
     <div>
-      <h2 className="mb-lg">Airline Message Board - {currentUser.airline}</h2>
+      <h2 className="mb-lg">Messages - {currentUser.airline}</h2>
 
       <ErrorMessage message={error} />
       <SuccessMessage message={success} />
 
       <div className="card mb-lg">
-        <h3 className="mb-md">Post Message</h3>
-        <form onSubmit={handleSubmit}>
+        <h3 className="mb-md">Request Passenger Removal</h3>
+        <p className="text-muted mb-md">
+          Send a request to the administrator to remove a passenger due to security violation of one or more bags.
+        </p>
+        <form onSubmit={handleSubmitRemovalRequest}>
+          <FormInput
+            label="Passenger ID"
+            name="passengerId"
+            value={passengerId}
+            onChange={(e) => setPassengerId(e.target.value)}
+            validator={validatePassengerId}
+            placeholder="6 digits"
+            required
+          />
           <div className="form-group">
-            <label className="form-label">Message</label>
+            <label className="form-label">
+              Reason for Removal <span style={{ color: 'var(--danger-color)' }}> *</span>
+            </label>
             <textarea
               className="form-textarea"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Type your message here..."
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Describe the security violation..."
               required
             />
           </div>
-          <div className="form-group">
-            <label className="form-label">Priority</label>
-            <select
-              className="form-select"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-            >
-              <option value={MESSAGE_PRIORITY.LOW}>Low</option>
-              <option value={MESSAGE_PRIORITY.NORMAL}>Normal</option>
-              <option value={MESSAGE_PRIORITY.HIGH}>High</option>
-            </select>
-          </div>
-          <button type="submit" className="btn btn-primary">
-            Post Message
+          <button type="submit" className="btn btn-danger">
+            Send Removal Request to Admin
           </button>
         </form>
       </div>
 
       <div className="card">
-        <h3 className="mb-md">Recent Messages</h3>
+        <h3 className="mb-md">Message History</h3>
         {messages.length === 0 ? (
           <p className="text-muted text-center">No messages yet</p>
         ) : (

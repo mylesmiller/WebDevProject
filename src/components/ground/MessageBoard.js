@@ -1,89 +1,28 @@
-import React, { useState } from 'react';
-import useAuth from '../../hooks/useAuth';
+import React from 'react';
 import useMessages from '../../hooks/useMessages';
-import ErrorMessage from '../common/ErrorMessage';
-import SuccessMessage from '../common/SuccessMessage';
 import { MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/dashboard.css';
 
 const MessageBoard = () => {
-  const { currentUser } = useAuth();
-  const { getMessagesByBoard, addMessage } = useMessages();
-  const [content, setContent] = useState('');
-  const [priority, setPriority] = useState(MESSAGE_PRIORITY.NORMAL);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const { getMessagesByBoard } = useMessages();
 
   const messages = getMessagesByBoard(MESSAGE_BOARDS.GROUND);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (!content.trim()) {
-      setError('Message content is required');
-      return;
-    }
-
-    try {
-      addMessage(MESSAGE_BOARDS.GROUND, {
-        author: currentUser.name,
-        content: content.trim(),
-        priority
-      });
-
-      setSuccess('Message posted successfully');
-      setContent('');
-      setPriority(MESSAGE_PRIORITY.NORMAL);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
   return (
     <div>
-      <h2 className="mb-lg">Ground Staff Message Board</h2>
+      <h2 className="mb-lg">Ground Staff Messages</h2>
 
-      <ErrorMessage message={error} />
-      <SuccessMessage message={success} />
-
-      <div className="card mb-lg">
-        <h3 className="mb-md">Post Message</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Message</label>
-            <textarea
-              className="form-textarea"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Type your message here..."
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Priority</label>
-            <select
-              className="form-select"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-            >
-              <option value={MESSAGE_PRIORITY.LOW}>Low</option>
-              <option value={MESSAGE_PRIORITY.NORMAL}>Normal</option>
-              <option value={MESSAGE_PRIORITY.HIGH}>High</option>
-            </select>
-          </div>
-          <button type="submit" className="btn btn-primary">
-            Post Message
-          </button>
-        </form>
+      <div className="card mb-lg" style={{ borderLeft: '4px solid var(--primary-color)' }}>
+        <p className="text-muted">
+          This message board displays system notifications such as gate change alerts and other operational updates. Security violation notifications are sent automatically to airline staff when you flag a bag during security clearance.
+        </p>
       </div>
 
       <div className="card">
-        <h3 className="mb-md">Recent Messages</h3>
+        <h3 className="mb-md">Notifications</h3>
         {messages.length === 0 ? (
-          <p className="text-muted text-center">No messages yet</p>
+          <p className="text-muted text-center">No notifications yet</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
             {messages.map(message => (

@@ -94,8 +94,6 @@ export const validateFlightForm = (formData) => {
   errors.airline = validateAirlineCode(formData.airline);
   errors.flightNumber = validateFlightNumber(formData.flightNumber);
   errors.gate = validateGate(formData.gate);
-  errors.destination = validateRequired(formData.destination, 'Destination');
-  errors.departureTime = validateRequired(formData.departureTime, 'Departure time');
 
   return Object.fromEntries(
     Object.entries(errors).filter(([_, v]) => v !== null)
@@ -109,8 +107,6 @@ export const validatePassengerForm = (formData) => {
   errors.passengerId = validatePassengerId(formData.passengerId);
   errors.ticketNumber = validateTicketNumber(formData.ticketNumber);
   errors.flightId = validateRequired(formData.flightId, 'Flight');
-  errors.email = validateEmail(formData.email);
-  errors.phone = validatePhone(formData.phone);
 
   return Object.fromEntries(
     Object.entries(errors).filter(([_, v]) => v !== null)

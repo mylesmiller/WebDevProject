@@ -1,90 +1,116 @@
 import React, { useState } from 'react';
 import useAuth from '../../hooks/useAuth';
 import useMessages from '../../hooks/useMessages';
+import useFlights from '../../hooks/useFlights';
+import useBags from '../../hooks/useBags';
+import usePassengers from '../../hooks/usePassengers';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
-import { MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
+import { MESSAGE_BOARDS, MESSAGE_PRIORITY, PASSENGER_STATUS } from '../../utils/constants';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/dashboard.css';
 
 const MessageBoard = () => {
   const { currentUser } = useAuth();
   const { getMessagesByBoard, addMessage } = useMessages();
-  const [content, setContent] = useState('');
-  const [priority, setPriority] = useState(MESSAGE_PRIORITY.NORMAL);
+  const { getFlightsByAirline } = useFlights();
+  const { areAllBagsLoaded } = useBags();
+  const { getPassengersByFlight } = usePassengers();
+  const [selectedFlightId, setSelectedFlightId] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   const messages = getMessagesByBoard(MESSAGE_BOARDS.GATE);
+  const flights = getFlightsByAirline(currentUser.airline);
 
-  const handleSubmit = (e) => {
+  const handleNotifyDepartureReady = (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    if (!content.trim()) {
-      setError('Message content is required');
+    if (!selectedFlightId) {
+      setError('Please select a flight');
       return;
     }
 
-    try {
-      addMessage(MESSAGE_BOARDS.GATE, {
-        author: currentUser.name,
-        airline: currentUser.airline,
-        content: content.trim(),
-        priority
-      });
-
-      setSuccess('Message posted successfully');
-      setContent('');
-      setPriority(MESSAGE_PRIORITY.NORMAL);
-    } catch (err) {
-      setError(err.message);
+    const flight = flights.find(f => f.id === selectedFlightId);
+    if (!flight) {
+      setError('Flight not found');
+      return;
     }
+
+    // Check if all passengers are boarded
+    const passengers = getPassengersByFlight(flight.id);
+    const allBoarded = passengers.every(p => p.status === PASSENGER_STATUS.BOARDED);
+    const boardedCount = passengers.filter(p => p.status === PASSENGER_STATUS.BOARDED).length;
+
+    // Check if all bags are loaded
+    const allBagsLoaded = areAllBagsLoaded(flight.id);
+
+    if (!allBoarded) {
+      setError(`Not all passengers are boarded (${boardedCount}/${passengers.length}). All passengers must board before departure notification.`);
+      return;
+    }
+
+    if (!allBagsLoaded) {
+      setError('Not all bags are loaded onto the aircraft.');
+      return;
+    }
+
+    const messageContent = `DEPARTURE READY - Flight ${flight.flightNumber} at Gate ${flight.gate}${flight.destination ? ` to ${flight.destination}` : ''} is ready for departure. All ${passengers.length} passenger(s) boarded and all bags loaded.`;
+
+    addMessage(MESSAGE_BOARDS.GATE, {
+      author: currentUser.name,
+      airline: currentUser.airline,
+      content: messageContent,
+      priority: MESSAGE_PRIORITY.HIGH
+    });
+
+    setSuccess(`Administrator has been notified that flight ${flight.flightNumber} is ready for departure.`);
+    setSelectedFlightId('');
   };
 
   return (
     <div>
-      <h2 className="mb-lg">Gate Staff Message Board</h2>
+      <h2 className="mb-lg">Messages - Departure Notifications</h2>
 
       <ErrorMessage message={error} />
       <SuccessMessage message={success} />
 
       <div className="card mb-lg">
-        <h3 className="mb-md">Post Message</h3>
-        <form onSubmit={handleSubmit}>
+        <h3 className="mb-md">Notify Admin - Plane Ready for Departure</h3>
+        <p className="text-muted mb-md">
+          Send a notification to the administrator that a plane is ready for departure. All passengers must be boarded and all bags loaded.
+        </p>
+        <form onSubmit={handleNotifyDepartureReady}>
           <div className="form-group">
-            <label className="form-label">Message</label>
-            <textarea
-              className="form-textarea"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Type your message here..."
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Priority</label>
+            <label className="form-label">
+              Select Flight <span style={{ color: 'var(--danger-color)' }}> *</span>
+            </label>
             <select
               className="form-select"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
+              value={selectedFlightId}
+              onChange={(e) => setSelectedFlightId(e.target.value)}
+              required
             >
-              <option value={MESSAGE_PRIORITY.LOW}>Low</option>
-              <option value={MESSAGE_PRIORITY.NORMAL}>Normal</option>
-              <option value={MESSAGE_PRIORITY.HIGH}>High</option>
+              <option value="">Select a flight</option>
+              {flights.map(flight => (
+                <option key={flight.id} value={flight.id}>
+                  {flight.flightNumber} - Gate {flight.gate}{flight.destination ? ` - ${flight.destination}` : ''}
+                </option>
+              ))}
             </select>
           </div>
-          <button type="submit" className="btn btn-primary">
-            Post Message
+          <button type="submit" className="btn btn-success">
+            Notify Admin - Ready for Departure
           </button>
         </form>
       </div>
 
       <div className="card">
-        <h3 className="mb-md">Recent Messages</h3>
+        <h3 className="mb-md">Departure Notification History</h3>
         {messages.length === 0 ? (
-          <p className="text-muted text-center">No messages yet</p>
+          <p className="text-muted text-center">No departure notifications sent yet</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
             {messages.map(message => (

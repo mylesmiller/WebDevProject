@@ -7,7 +7,7 @@ import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
-import { validateFlightNumber, validateGate, validateRequired } from '../../utils/validators';
+import { validateFlightNumber, validateGate } from '../../utils/validators';
 import { formatDate, extractAirlineCode, getAirlineName } from '../../utils/helpers';
 import { MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
 import '../../styles/dashboard.css';
@@ -121,8 +121,8 @@ const FlightManagement = () => {
     { header: 'Flight Number', accessor: 'flightNumber' },
     { header: 'Airline', render: (row) => getAirlineName(row.airline) },
     { header: 'Gate', accessor: 'gate' },
-    { header: 'Destination', accessor: 'destination' },
-    { header: 'Departure', render: (row) => formatDate(row.departureTime) },
+    { header: 'Destination', render: (row) => row.destination || '-' },
+    { header: 'Departure', render: (row) => row.departureTime ? formatDate(row.departureTime) : '-' },
     { header: 'Status', render: (row) => <span className={`status-badge status-${row.status}`}>{row.status}</span> },
     { header: 'Passengers', render: (row) => row.passengerIds.length },
     {
@@ -180,9 +180,7 @@ const FlightManagement = () => {
                 name="destination"
                 value={formData.destination}
                 onChange={handleChange}
-                validator={validateRequired}
                 placeholder="e.g., New York (JFK)"
-                required
               />
               <FormInput
                 label="Departure Time"
@@ -190,8 +188,6 @@ const FlightManagement = () => {
                 type="datetime-local"
                 value={formData.departureTime}
                 onChange={handleChange}
-                validator={validateRequired}
-                required
               />
             </div>
             <button type="submit" className="btn btn-primary mt-md">

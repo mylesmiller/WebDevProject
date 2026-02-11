@@ -9,9 +9,7 @@ import SuccessMessage from '../common/SuccessMessage';
 import {
   validatePassengerId,
   validateTicketNumber,
-  validateName,
-  validateEmail,
-  validatePhone
+  validateName
 } from '../../utils/validators';
 import { getPassengerStatusDisplayName } from '../../utils/helpers';
 import '../../styles/dashboard.css';
@@ -173,18 +171,14 @@ const PassengerManagement = () => {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                validator={validateEmail}
                 placeholder="e.g., john@email.com"
-                required
               />
               <FormInput
                 label="Phone"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                validator={validatePhone}
                 placeholder="10 digits, first digit not 0"
-                required
               />
             </div>
             <button type="submit" className="btn btn-primary mt-md">

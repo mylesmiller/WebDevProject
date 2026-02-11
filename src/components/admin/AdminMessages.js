@@ -18,20 +18,24 @@ const AdminMessages = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Filter airline messages for ADMIN (passenger removal requests)
-  const allMessages = getMessagesByBoard(MESSAGE_BOARDS.AIRLINE);
-  const messages = allMessages.filter(msg =>
+  // Passenger removal requests from airline staff
+  const allAirlineMessages = getMessagesByBoard(MESSAGE_BOARDS.AIRLINE);
+  const removalRequests = allAirlineMessages.filter(msg =>
     msg.airline === 'ADMIN' && msg.content.includes('PASSENGER REMOVAL REQUEST')
   );
 
+  // Departure notifications from gate staff
+  const gateMessages = getMessagesByBoard(MESSAGE_BOARDS.GATE);
+  const departureNotifications = gateMessages.filter(msg =>
+    msg.content.includes('DEPARTURE READY')
+  );
+
   const extractPassengerId = (messageContent) => {
-    // Extract passenger ID from message content
     const match = messageContent.match(/ID:\s*(\d{6})/);
     return match ? match[1] : null;
   };
 
   const extractTicketNumber = (messageContent) => {
-    // Extract ticket number from message content
     const match = messageContent.match(/Ticket:\s*(\d{10})/);
     return match ? match[1] : null;
   };
@@ -65,13 +69,11 @@ const AdminMessages = () => {
         return;
       }
 
-      // Verify ticket matches
       if (passenger.ticketNumber !== ticketNumber) {
         setError('Ticket number mismatch');
         return;
       }
 
-      // Check if passenger has any remaining bags
       const allBags = getAllBags();
       const remainingBags = allBags.filter(bag => bag.passengerId === passengerId);
 
@@ -80,10 +82,7 @@ const AdminMessages = () => {
         return;
       }
 
-      // Remove passenger
       removePassenger(passengerId);
-
-      // Delete the message
       deleteMessage(MESSAGE_BOARDS.AIRLINE, selectedMessage.id);
 
       setSuccess(`Passenger ${passenger.name} (ID: ${passengerId}) has been removed from the system.`);
@@ -94,6 +93,11 @@ const AdminMessages = () => {
     }
   };
 
+  const handleAcknowledgeDeparture = (message) => {
+    deleteMessage(MESSAGE_BOARDS.GATE, message.id);
+    setSuccess('Departure notification acknowledged.');
+  };
+
   return (
     <div>
       <h2 className="mb-lg">Administrator Messages</h2>
@@ -101,13 +105,14 @@ const AdminMessages = () => {
       <ErrorMessage message={error} />
       <SuccessMessage message={success} />
 
-      <div className="card">
+      <div className="card mb-lg">
         <h3 className="mb-md">Passenger Removal Requests</h3>
-        {messages.length === 0 ? (
+        <p className="text-muted mb-md">Requests from airline staff to remove passengers due to security violations.</p>
+        {removalRequests.length === 0 ? (
           <p className="text-muted text-center">No pending removal requests</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-            {messages.map(message => (
+            {removalRequests.map(message => (
               <div
                 key={message.id}
                 className="card"
@@ -132,6 +137,49 @@ const AdminMessages = () => {
                     onClick={() => handleSelectMessage(message)}
                   >
                     Process Request
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h3 className="mb-md">Departure Notifications</h3>
+        <p className="text-muted mb-md">Notifications from gate staff that a plane is ready for departure.</p>
+        {departureNotifications.length === 0 ? (
+          <p className="text-muted text-center">No departure notifications</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+            {departureNotifications.map(message => (
+              <div
+                key={message.id}
+                className="card"
+                style={{
+                  borderLeft: '4px solid var(--success-color)',
+                  backgroundColor: 'rgba(34, 197, 94, 0.05)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-sm)' }}>
+                  <div>
+                    <strong>{message.author}</strong>
+                    {message.airline && <span className="text-muted"> ({message.airline})</span>}
+                  </div>
+                  <span className="text-muted" style={{ fontSize: 'var(--text-sm)' }}>
+                    {formatDate(message.timestamp)}
+                  </span>
+                </div>
+                <p style={{ margin: '0 0 var(--spacing-md) 0' }}>{message.content}</p>
+                <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+                  <span className="status-badge status-success">
+                    departure ready
+                  </span>
+                  <button
+                    className="btn btn-success btn-sm"
+                    onClick={() => handleAcknowledgeDeparture(message)}
+                  >
+                    Acknowledge
                   </button>
                 </div>
               </div>
