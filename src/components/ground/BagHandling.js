@@ -86,17 +86,6 @@ const BagHandling = () => {
     }
   };
 
-  const getNextLocation = (currentLocation) => {
-    const sequence = [
-      BAG_LOCATIONS.CHECK_IN,
-      BAG_LOCATIONS.SECURITY,
-      BAG_LOCATIONS.GATE,
-      BAG_LOCATIONS.LOADED
-    ];
-    const currentIndex = sequence.indexOf(currentLocation);
-    return currentIndex < sequence.length - 1 ? sequence[currentIndex + 1] : null;
-  };
-
   const getPassengerInfo = (passengerId) => {
     const passenger = getPassengerById(passengerId);
     return passenger ? `${passenger.name} (${passenger.id})` : 'N/A';

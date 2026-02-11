@@ -9,11 +9,11 @@ import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
 import { validateFlightNumber, validateGate, validateRequired } from '../../utils/validators';
 import { formatDate, extractAirlineCode, getAirlineName } from '../../utils/helpers';
-import { AIRLINES, MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
+import { MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
 import '../../styles/dashboard.css';
 
 const FlightManagement = () => {
-  const { getAllFlights, addFlight, removeFlight, changeGate, getFlightById } = useFlights();
+  const { getAllFlights, addFlight, removeFlight, changeGate } = useFlights();
   const { addMessage } = useMessages();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({

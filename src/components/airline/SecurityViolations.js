@@ -3,11 +3,10 @@ import useAuth from '../../hooks/useAuth';
 import useMessages from '../../hooks/useMessages';
 import useBags from '../../hooks/useBags';
 import usePassengers from '../../hooks/usePassengers';
-import useFlights from '../../hooks/useFlights';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
 import Modal from '../common/Modal';
-import { MESSAGE_BOARDS, MESSAGE_PRIORITY, BAG_LOCATIONS } from '../../utils/constants';
+import { MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/dashboard.css';
 
@@ -16,7 +15,6 @@ const SecurityViolations = () => {
   const { getAirlineMessages, addMessage, deleteMessage } = useMessages();
   const { getAllBags, removeBag } = useBags();
   const { getPassengerById } = usePassengers();
-  const { getFlightById } = useFlights();
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState('');

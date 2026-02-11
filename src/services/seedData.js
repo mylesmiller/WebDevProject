@@ -1,4 +1,4 @@
-import { ROLES, PASSENGER_STATUS, BAG_LOCATIONS, FLIGHT_STATUS } from '../utils/constants';
+import { ROLES, PASSENGER_STATUS, FLIGHT_STATUS } from '../utils/constants';
 import { hashPassword } from '../utils/encryption';
 
 // Seed data for testing

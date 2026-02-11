@@ -18,7 +18,7 @@ const BoardingPanel = () => {
   const { currentUser } = useAuth();
   const { getFlightsByAirline, updateFlight, changeGate } = useFlights();
   const { getPassengersByFlight, boardPassenger } = usePassengers();
-  const { getBagsByFlight, areAllBagsLoaded, getUnloadedBags } = useBags();
+  const { areAllBagsLoaded, getUnloadedBags } = useBags();
   const { addMessage } = useMessages();
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [error, setError] = useState('');

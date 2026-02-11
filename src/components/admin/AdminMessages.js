@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import useAuth from '../../hooks/useAuth';
 import useMessages from '../../hooks/useMessages';
 import usePassengers from '../../hooks/usePassengers';
 import useBags from '../../hooks/useBags';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
 import Modal from '../common/Modal';
-import { MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
+import { MESSAGE_BOARDS } from '../../utils/constants';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/dashboard.css';
 
 const AdminMessages = () => {
-  const { currentUser } = useAuth();
   const { getMessagesByBoard, deleteMessage } = useMessages();
   const { removePassenger, getPassengerById } = usePassengers();
   const { getAllBags } = useBags();
