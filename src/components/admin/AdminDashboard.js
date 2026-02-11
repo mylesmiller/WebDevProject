@@ -4,6 +4,7 @@ import SystemOverview from './SystemOverview';
 import FlightManagement from './FlightManagement';
 import PassengerManagement from './PassengerManagement';
 import StaffManagement from './StaffManagement';
+import AdminMessages from './AdminMessages';
 import '../../styles/dashboard.css';
 
 const AdminDashboard = () => {
@@ -41,6 +42,12 @@ const AdminDashboard = () => {
           >
             Staff
           </button>
+          <button
+            className={`tab ${activeTab === 'messages' ? 'active' : ''}`}
+            onClick={() => setActiveTab('messages')}
+          >
+            Messages
+          </button>
         </div>
 
         <div>
@@ -48,6 +55,7 @@ const AdminDashboard = () => {
           {activeTab === 'flights' && <FlightManagement />}
           {activeTab === 'passengers' && <PassengerManagement />}
           {activeTab === 'staff' && <StaffManagement />}
+          {activeTab === 'messages' && <AdminMessages />}
         </div>
       </div>
     </div>

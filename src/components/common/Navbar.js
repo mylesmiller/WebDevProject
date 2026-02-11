@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { getRoleDisplayName } from '../../utils/helpers';
+import { ROLES } from '../../utils/constants';
 import '../../styles/dashboard.css';
 
 const Navbar = () => {
@@ -13,7 +14,13 @@ const Navbar = () => {
     navigate('/login');
   };
 
+  const handleChangePassword = () => {
+    navigate('/change-password');
+  };
+
   if (!currentUser) return null;
+
+  const isStaffUser = currentUser.role !== ROLES.PASSENGER;
 
   return (
     <div className="dashboard-header">
@@ -29,9 +36,16 @@ const Navbar = () => {
               {currentUser.airline && ` - ${currentUser.airline}`}
             </div>
           </div>
-          <button className="btn btn-secondary btn-sm" onClick={handleLogout}>
-            Logout
-          </button>
+          <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+            {isStaffUser && (
+              <button className="btn btn-secondary btn-sm" onClick={handleChangePassword}>
+                Change Password
+              </button>
+            )}
+            <button className="btn btn-secondary btn-sm" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -3,21 +3,28 @@ import useAuth from '../../hooks/useAuth';
 import useFlights from '../../hooks/useFlights';
 import usePassengers from '../../hooks/usePassengers';
 import useBags from '../../hooks/useBags';
+import useMessages from '../../hooks/useMessages';
 import Table from '../common/Table';
+import Modal from '../common/Modal';
+import FormInput from '../common/FormInput';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
-import { PASSENGER_STATUS, FLIGHT_STATUS } from '../../utils/constants';
+import { PASSENGER_STATUS, FLIGHT_STATUS, MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
 import { getPassengerStatusDisplayName, formatDate, getBagLocationDisplayName } from '../../utils/helpers';
+import { validateGate } from '../../utils/validators';
 import '../../styles/dashboard.css';
 
 const BoardingPanel = () => {
   const { currentUser } = useAuth();
-  const { getFlightsByAirline, updateFlight } = useFlights();
+  const { getFlightsByAirline, updateFlight, changeGate } = useFlights();
   const { getPassengersByFlight, boardPassenger } = usePassengers();
   const { getBagsByFlight, areAllBagsLoaded, getUnloadedBags } = useBags();
+  const { addMessage } = useMessages();
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showGateModal, setShowGateModal] = useState(false);
+  const [newGate, setNewGate] = useState('');
 
   const flights = getFlightsByAirline(currentUser.airline);
 
@@ -57,6 +64,52 @@ const BoardingPanel = () => {
     try {
       updateFlight(selectedFlight.id, { status });
       setSuccess(`Flight status updated to ${status}`);
+
+      // Refresh flight selection
+      const updatedFlights = getFlightsByAirline(currentUser.airline);
+      const updatedFlight = updatedFlights.find(f => f.id === selectedFlight.id);
+      setSelectedFlight(updatedFlight);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleOpenGateModal = () => {
+    setShowGateModal(true);
+    setNewGate(selectedFlight.gate);
+    setError('');
+  };
+
+  const handleChangeGate = () => {
+    setError('');
+    setSuccess('');
+
+    try {
+      if (!newGate || !newGate.trim()) {
+        setError('Gate is required');
+        return;
+      }
+
+      const gateError = validateGate(newGate);
+      if (gateError) {
+        setError(gateError);
+        return;
+      }
+
+      const result = changeGate(selectedFlight.id, newGate.toUpperCase());
+
+      // Send notification to ground staff
+      const messageContent = `GATE CHANGE - Flight ${result.flight.flightNumber} gate changed from ${result.oldGate} to ${result.newGate}. Please update baggage routing accordingly.`;
+
+      addMessage(MESSAGE_BOARDS.GROUND, {
+        author: currentUser.name,
+        content: messageContent,
+        priority: MESSAGE_PRIORITY.HIGH
+      });
+
+      setSuccess(`Gate changed from ${result.oldGate} to ${result.newGate}. Ground staff has been notified.`);
+      setShowGateModal(false);
+      setNewGate('');
 
       // Refresh flight selection
       const updatedFlights = getFlightsByAirline(currentUser.airline);
@@ -143,6 +196,13 @@ const BoardingPanel = () => {
 
             <div className="btn-group">
               <button
+                className="btn btn-primary"
+                onClick={handleOpenGateModal}
+                disabled={selectedFlight.status === FLIGHT_STATUS.DEPARTED}
+              >
+                Change Gate
+              </button>
+              <button
                 className="btn btn-warning"
                 onClick={() => handleUpdateFlightStatus(FLIGHT_STATUS.BOARDING)}
                 disabled={selectedFlight.status === FLIGHT_STATUS.BOARDING}
@@ -194,6 +254,54 @@ const BoardingPanel = () => {
             />
           </div>
         </>
+      )}
+
+      {showGateModal && selectedFlight && (
+        <Modal
+          title="Change Gate"
+          onClose={() => {
+            setShowGateModal(false);
+            setNewGate('');
+            setError('');
+          }}
+        >
+          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <p><strong>Flight:</strong> {selectedFlight.flightNumber}</p>
+            <p><strong>Current Gate:</strong> {selectedFlight.gate}</p>
+            <p><strong>Destination:</strong> {selectedFlight.destination}</p>
+          </div>
+
+          <FormInput
+            label="New Gate"
+            name="newGate"
+            value={newGate}
+            onChange={(e) => setNewGate(e.target.value)}
+            validator={validateGate}
+            placeholder="e.g., A12"
+            required
+          />
+
+          <ErrorMessage message={error} />
+
+          <div style={{ display: 'flex', gap: 'var(--spacing-md)', justifyContent: 'flex-end', marginTop: 'var(--spacing-md)' }}>
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                setShowGateModal(false);
+                setNewGate('');
+                setError('');
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={handleChangeGate}
+            >
+              Change Gate
+            </button>
+          </div>
+        </Modal>
       )}
     </div>
   );

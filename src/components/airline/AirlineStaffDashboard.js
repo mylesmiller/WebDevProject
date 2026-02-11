@@ -4,6 +4,7 @@ import useAuth from '../../hooks/useAuth';
 import CheckInPanel from './CheckInPanel';
 import FlightPassengers from './FlightPassengers';
 import MessageBoard from './MessageBoard';
+import SecurityViolations from './SecurityViolations';
 import '../../styles/dashboard.css';
 
 const AirlineStaffDashboard = () => {
@@ -33,6 +34,12 @@ const AirlineStaffDashboard = () => {
             Passengers
           </button>
           <button
+            className={`tab ${activeTab === 'security' ? 'active' : ''}`}
+            onClick={() => setActiveTab('security')}
+          >
+            Security Violations
+          </button>
+          <button
             className={`tab ${activeTab === 'messages' ? 'active' : ''}`}
             onClick={() => setActiveTab('messages')}
           >
@@ -43,6 +50,7 @@ const AirlineStaffDashboard = () => {
         <div>
           {activeTab === 'checkin' && <CheckInPanel />}
           {activeTab === 'passengers' && <FlightPassengers />}
+          {activeTab === 'security' && <SecurityViolations />}
           {activeTab === 'messages' && <MessageBoard />}
         </div>
       </div>

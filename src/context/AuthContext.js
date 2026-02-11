@@ -47,7 +47,8 @@ export const AuthProvider = ({ children }) => {
       name: user.name,
       email: user.email,
       phone: user.phone,
-      airline: user.airline
+      airline: user.airline,
+      mustChangePassword: user.mustChangePassword || false
     };
 
     setCurrentUser(sessionUser);
@@ -99,6 +100,19 @@ export const AuthProvider = ({ children }) => {
     return roles.includes(currentUser?.role);
   };
 
+  // Update current user session (e.g., after password change)
+  const updateCurrentUser = (updates) => {
+    if (!currentUser) return;
+
+    const updatedUser = {
+      ...currentUser,
+      ...updates
+    };
+
+    setCurrentUser(updatedUser);
+    StorageService.set(STORAGE_KEYS.CURRENT_USER, updatedUser);
+  };
+
   const value = {
     currentUser,
     login,
@@ -106,6 +120,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     hasRole,
     hasAnyRole,
+    updateCurrentUser,
     loading,
     isAuthenticated: !!currentUser
   };

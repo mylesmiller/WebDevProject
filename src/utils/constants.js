@@ -12,7 +12,8 @@ export const BAG_LOCATIONS = {
   CHECK_IN: 'check-in',
   SECURITY: 'security',
   GATE: 'gate',
-  LOADED: 'loaded'
+  LOADED: 'loaded',
+  SECURITY_VIOLATION: 'security-violation'
 };
 
 // Passenger status constants

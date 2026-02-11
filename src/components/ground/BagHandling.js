@@ -3,10 +3,11 @@ import useAuth from '../../hooks/useAuth';
 import useBags from '../../hooks/useBags';
 import usePassengers from '../../hooks/usePassengers';
 import useFlights from '../../hooks/useFlights';
+import useMessages from '../../hooks/useMessages';
 import Table from '../common/Table';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
-import { BAG_LOCATIONS, PASSENGER_STATUS } from '../../utils/constants';
+import { BAG_LOCATIONS, PASSENGER_STATUS, MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
 import { getBagLocationDisplayName, formatDate } from '../../utils/helpers';
 import '../../styles/dashboard.css';
 
@@ -15,6 +16,7 @@ const BagHandling = () => {
   const { getAllBags, updateBagLocation } = useBags();
   const { getPassengerById } = usePassengers();
   const { getFlightById } = useFlights();
+  const { addMessage } = useMessages();
   const [selectedBag, setSelectedBag] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -36,6 +38,44 @@ const BagHandling = () => {
     try {
       updateBagLocation(selectedBag.id, newLocation, currentUser.id);
       setSuccess(`Bag moved to ${getBagLocationDisplayName(newLocation)}`);
+
+      // Refresh bag selection
+      const updatedBags = getAllBags();
+      const updatedBag = updatedBags.find(b => b.id === selectedBag.id);
+      setSelectedBag(updatedBag);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleSecurityViolation = () => {
+    setError('');
+    setSuccess('');
+
+    try {
+      // Get passenger and flight info
+      const passenger = getPassengerById(selectedBag.passengerId);
+      const flight = getFlightById(selectedBag.flightId);
+
+      if (!passenger || !flight) {
+        setError('Unable to find passenger or flight information');
+        return;
+      }
+
+      // Update bag location to security violation
+      updateBagLocation(selectedBag.id, BAG_LOCATIONS.SECURITY_VIOLATION, currentUser.id);
+
+      // Create high-priority message to airline staff
+      const messageContent = `SECURITY VIOLATION - Bag ID: ${selectedBag.id}, Passenger: ${passenger.name} (ID: ${passenger.id}), Ticket: ${passenger.ticketNumber}, Flight: ${flight.flightNumber}. Please remove passenger and all associated bags from the system.`;
+
+      addMessage(MESSAGE_BOARDS.AIRLINE, {
+        author: currentUser.name,
+        airline: flight.airline,
+        content: messageContent,
+        priority: MESSAGE_PRIORITY.HIGH
+      });
+
+      setSuccess('Security violation flagged. Airline staff has been notified.');
 
       // Refresh bag selection
       const updatedBags = getAllBags();
@@ -116,6 +156,7 @@ const BagHandling = () => {
             <option value={BAG_LOCATIONS.SECURITY}>Security</option>
             <option value={BAG_LOCATIONS.GATE}>Gate</option>
             <option value={BAG_LOCATIONS.LOADED}>Loaded</option>
+            <option value={BAG_LOCATIONS.SECURITY_VIOLATION}>Security Violation</option>
           </select>
         </div>
 
@@ -189,12 +230,20 @@ const BagHandling = () => {
               </button>
             )}
             {selectedBag.location === BAG_LOCATIONS.SECURITY && (
-              <button
-                className="btn btn-primary"
-                onClick={() => handleUpdateLocation(BAG_LOCATIONS.GATE)}
-              >
-                Move to Gate
-              </button>
+              <>
+                <button
+                  className="btn btn-success"
+                  onClick={() => handleUpdateLocation(BAG_LOCATIONS.GATE)}
+                >
+                  Clear and Move to Gate
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={handleSecurityViolation}
+                >
+                  Mark as Security Violation
+                </button>
+              </>
             )}
             {selectedBag.location === BAG_LOCATIONS.GATE && (
               <>
@@ -214,6 +263,11 @@ const BagHandling = () => {
             )}
             {selectedBag.location === BAG_LOCATIONS.LOADED && (
               <div className="success-message">Bag is loaded on aircraft</div>
+            )}
+            {selectedBag.location === BAG_LOCATIONS.SECURITY_VIOLATION && (
+              <div className="error-message">
+                This bag has been flagged for security violation. Airline staff has been notified.
+              </div>
             )}
           </div>
         </div>

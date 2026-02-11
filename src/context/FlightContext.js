@@ -131,6 +131,35 @@ export const FlightProvider = ({ children }) => {
     setFlights(flightsData);
   }, []);
 
+  // Change gate (validates no conflict and returns old gate for notification)
+  const changeGate = useCallback((flightId, newGate) => {
+    const flightsData = StorageService.get(STORAGE_KEYS.FLIGHTS) || {};
+
+    if (!flightsData[flightId]) {
+      throw new Error('Flight not found');
+    }
+
+    // Check if new gate is already in use by another active flight
+    const gateInUse = Object.values(flightsData).some(
+      f => f.id !== flightId &&
+           f.gate === newGate &&
+           f.status !== FLIGHT_STATUS.DEPARTED &&
+           f.status !== FLIGHT_STATUS.CANCELLED
+    );
+
+    if (gateInUse) {
+      throw new Error(`Gate ${newGate} is already in use by another flight`);
+    }
+
+    const oldGate = flightsData[flightId].gate;
+
+    flightsData[flightId].gate = newGate;
+    StorageService.set(STORAGE_KEYS.FLIGHTS, flightsData);
+    setFlights(flightsData);
+
+    return { oldGate, newGate, flight: flightsData[flightId] };
+  }, []);
+
   const value = {
     flights,
     getAllFlights,
@@ -141,6 +170,7 @@ export const FlightProvider = ({ children }) => {
     removeFlight,
     addPassengerToFlight,
     removePassengerFromFlight,
+    changeGate,
     refreshFlights
   };
 

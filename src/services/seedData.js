@@ -11,7 +11,8 @@ export const seedData = {
       role: ROLES.ADMIN,
       name: 'System Administrator',
       email: 'admin@airport.com',
-      phone: '5551234567'
+      phone: '5551234567',
+      mustChangePassword: false
     },
     'airline_001': {
       id: 'airline_001',
@@ -21,7 +22,8 @@ export const seedData = {
       name: 'Alice Brown',
       email: 'alice.brown@aa.com',
       phone: '5552345678',
-      airline: 'AA'
+      airline: 'AA',
+      mustChangePassword: false
     },
     'airline_002': {
       id: 'airline_002',
@@ -31,7 +33,8 @@ export const seedData = {
       name: 'Bob Johnson',
       email: 'bob.johnson@delta.com',
       phone: '5553456789',
-      airline: 'DL'
+      airline: 'DL',
+      mustChangePassword: false
     },
     'gate_001': {
       id: 'gate_001',
@@ -41,7 +44,8 @@ export const seedData = {
       name: 'Eve Wilson',
       email: 'eve.wilson@aa.com',
       phone: '5554567890',
-      airline: 'AA'
+      airline: 'AA',
+      mustChangePassword: false
     },
     'gate_002': {
       id: 'gate_002',
@@ -51,7 +55,8 @@ export const seedData = {
       name: 'Frank Davis',
       email: 'frank.davis@delta.com',
       phone: '5555678901',
-      airline: 'DL'
+      airline: 'DL',
+      mustChangePassword: false
     },
     'ground_001': {
       id: 'ground_001',
@@ -60,7 +65,8 @@ export const seedData = {
       role: ROLES.GROUND_STAFF,
       name: 'Grace Taylor',
       email: 'grace.taylor@airport.com',
-      phone: '5556789012'
+      phone: '5556789012',
+      mustChangePassword: false
     },
     'ground_002': {
       id: 'ground_002',
@@ -69,7 +75,8 @@ export const seedData = {
       role: ROLES.GROUND_STAFF,
       name: 'Henry Moore',
       email: 'henry.moore@airport.com',
-      phone: '5557890123'
+      phone: '5557890123',
+      mustChangePassword: false
     }
   },
 

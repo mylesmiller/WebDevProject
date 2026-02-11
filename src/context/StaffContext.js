@@ -50,7 +50,8 @@ export const StaffProvider = ({ children }) => {
       name: staffData.name,
       email: staffData.email,
       phone: staffData.phone,
-      airline: staffData.airline || null
+      airline: staffData.airline || null,
+      mustChangePassword: true
     };
 
     // Save to storage
@@ -84,6 +85,22 @@ export const StaffProvider = ({ children }) => {
     return staff[staffId];
   }, [staff]);
 
+  // Change password
+  const changePassword = useCallback((staffId, newPassword) => {
+    const users = StorageService.get(STORAGE_KEYS.USERS) || {};
+
+    if (!users[staffId]) {
+      throw new Error('User not found');
+    }
+
+    const hashedPassword = hashPassword(newPassword);
+    users[staffId].password = hashedPassword;
+    users[staffId].mustChangePassword = false;
+
+    StorageService.set(STORAGE_KEYS.USERS, users);
+    setStaff(users);
+  }, []);
+
   const value = {
     staff,
     getAllStaff,
@@ -92,6 +109,7 @@ export const StaffProvider = ({ children }) => {
     addStaff,
     removeStaff,
     getStaffById,
+    changePassword,
     refreshStaff
   };
 

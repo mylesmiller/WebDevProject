@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import AppProviders from './AppProviders';
 import LoginForm from './components/auth/LoginForm';
 import PassengerLogin from './components/auth/PassengerLogin';
+import ChangePasswordPage from './components/auth/ChangePasswordPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AirlineStaffDashboard from './components/airline/AirlineStaffDashboard';
@@ -19,6 +20,16 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<LoginForm />} />
           <Route path="/passenger-login" element={<PassengerLogin />} />
+
+          {/* Change password route - requires authentication */}
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.AIRLINE_STAFF, ROLES.GATE_STAFF, ROLES.GROUND_STAFF]}>
+                <ChangePasswordPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected routes */}
           <Route

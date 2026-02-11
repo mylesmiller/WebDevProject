@@ -69,7 +69,8 @@ export const getBagLocationDisplayName = (location) => {
     'check-in': 'Check-In',
     'security': 'Security',
     'gate': 'Gate',
-    'loaded': 'Loaded on Aircraft'
+    'loaded': 'Loaded on Aircraft',
+    'security-violation': 'Security Violation'
   };
   return locationNames[location] || location;
 };
@@ -97,7 +98,8 @@ export const getStatusColor = (status) => {
     'check-in': 'status-pending',
     'security': 'status-warning',
     'gate': 'status-success',
-    'loaded': 'status-info'
+    'loaded': 'status-info',
+    'security-violation': 'status-danger'
   };
   return colors[status] || '';
 };
