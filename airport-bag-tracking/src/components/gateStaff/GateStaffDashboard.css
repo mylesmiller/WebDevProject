@@ -1,11 +1,11 @@
 .info-text {
   margin-top: 1rem;
   padding: 0.75rem;
-  background-color: rgba(99, 102, 241, 0.1);
-  color: #a5b4fc;
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #fcd34d;
   border-radius: 8px;
   font-size: 0.9rem;
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  border: 1px solid rgba(245, 158, 11, 0.25);
 }
 
 /* Gate Selection Screen */
@@ -22,8 +22,8 @@
 }
 
 .gate-option-card {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(67, 56, 202, 0.15) 100%);
-  border: 2px solid rgba(99, 102, 241, 0.3);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(180, 83, 9, 0.15) 100%);
+  border: 2px solid rgba(245, 158, 11, 0.3);
   border-radius: 12px;
   padding: 1.25rem;
   cursor: pointer;
@@ -32,8 +32,8 @@
 
 .gate-option-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
-  border-color: #6366f1;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
 }
 
 .gate-header {
@@ -46,11 +46,11 @@
 .gate-number {
   font-size: 1.25rem;
   font-weight: bold;
-  color: #a5b4fc;
+  color: #fcd34d;
 }
 
 .flight-number {
-  background: #6366f1;
+  background: #f59e0b;
   color: white;
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
@@ -59,7 +59,7 @@
 }
 
 .gate-destination {
-  color: #a5b4fc;
+  color: #fcd34d;
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }
@@ -87,7 +87,7 @@
 .stat-value {
   font-size: 1rem;
   font-weight: 600;
-  color: #a5b4fc;
+  color: #fcd34d;
 }
 
 .no-flights-message {
@@ -127,7 +127,7 @@
 
 /* Flight Info Card */
 .flight-info-card {
-  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
   color: white;
   border-radius: 14px;
   padding: 1.5rem;

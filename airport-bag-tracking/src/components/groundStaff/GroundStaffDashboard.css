@@ -6,7 +6,7 @@
 }
 
 .stat {
-  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
   color: white;
   padding: 1rem 1.5rem;
   border-radius: 12px;
@@ -45,8 +45,8 @@ textarea {
 
 textarea:focus {
   outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
 }
 
 textarea.error {
@@ -77,7 +77,7 @@ textarea.error {
 }
 
 .location-option:hover {
-  border-color: #6366f1;
+  border-color: #f59e0b;
   background: #334155;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
@@ -162,11 +162,11 @@ textarea.error {
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(67, 56, 202, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(180, 83, 9, 0.15) 100%);
 }
 
 .gate-option:hover {
-  border-color: #6366f1;
+  border-color: #f59e0b;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
@@ -174,12 +174,12 @@ textarea.error {
 .gate-number {
   font-size: 1.25rem;
   font-weight: bold;
-  color: #a5b4fc;
+  color: #fcd34d;
 }
 
 .gate-flight {
   font-size: 0.9rem;
-  color: #818cf8;
+  color: #fbbf24;
   margin: 0.25rem 0;
 }
 
@@ -218,7 +218,7 @@ textarea.error {
 
 /* Gate Info Card */
 .gate-info-card {
-  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
   color: white;
   border-radius: 14px;
   padding: 1.5rem;
@@ -308,9 +308,9 @@ textarea.error {
 }
 
 .location-checkin {
-  background: rgba(99, 102, 241, 0.15);
-  color: #a5b4fc;
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  background: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .location-security {

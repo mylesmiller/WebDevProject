@@ -58,7 +58,7 @@
   display: block;
   font-size: 2rem;
   font-weight: bold;
-  color: #818cf8;
+  color: #fbbf24;
 }
 
 .flight-airline {
@@ -127,7 +127,7 @@
 }
 
 .progress-step.completed .step-icon {
-  background-color: #6366f1;
+  background-color: #f59e0b;
   color: white;
 }
 
@@ -139,7 +139,7 @@
 }
 
 .progress-step.completed .step-label {
-  color: #818cf8;
+  color: #fbbf24;
   font-weight: 600;
 }
 
@@ -158,7 +158,7 @@
 }
 
 .progress-complete {
-  color: #818cf8;
+  color: #fbbf24;
   font-weight: 600;
 }
 

@@ -27,7 +27,7 @@
 .form-textarea:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
 }
 
 .form-input.error,
@@ -81,7 +81,7 @@
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #475569;
+  background-color: #68635c;
 }
 
 .btn-success {

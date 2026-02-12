@@ -114,13 +114,13 @@ body {
 }
 
 .btn-primary {
-  background-color: #6366f1;
+  background-color: #f59e0b;
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #818cf8;
-  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.4);
+  background-color: #fbbf24;
+  box-shadow: 0 2px 12px rgba(245, 158, 11, 0.4);
 }
 
 .btn-secondary {
@@ -199,7 +199,7 @@ body {
 }
 
 .tab-btn.active {
-  background-color: #6366f1;
+  background-color: #f59e0b;
   color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
@@ -243,9 +243,9 @@ body {
 }
 
 .location-checkin {
-  background-color: rgba(99, 102, 241, 0.15);
-  color: #a5b4fc;
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .location-security {
@@ -334,25 +334,25 @@ body {
 }
 
 .staff-tab-btn:hover {
-  border-color: #6366f1;
-  color: #a5b4fc;
+  border-color: #f59e0b;
+  color: #fcd34d;
 }
 
 .staff-tab-btn.active {
-  background-color: #6366f1;
+  background-color: #f59e0b;
   color: white;
-  border-color: #6366f1;
+  border-color: #f59e0b;
 }
 
 /* Info text */
 .info-text {
   margin-top: 1rem;
   padding: 0.75rem;
-  background-color: rgba(99, 102, 241, 0.1);
-  color: #a5b4fc;
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #fcd34d;
   border-radius: 8px;
   font-size: 0.9rem;
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  border: 1px solid rgba(245, 158, 11, 0.25);
 }
 
 /* Dialog overlay */

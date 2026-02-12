@@ -62,13 +62,13 @@ code {
 }
 
 .status-info {
-  background-color: #cffafe;
-  color: #155e75;
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
 .status-pending {
-  background-color: #f1f5f9;
-  color: #475569;
+  background-color: #f5f0e8;
+  color: #57534e;
 }
 
 .error-message {

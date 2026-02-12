@@ -27,7 +27,7 @@
 }
 
 .tab-btn.active {
-  background-color: #6366f1;
+  background-color: #f59e0b;
   color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
@@ -132,12 +132,12 @@
 }
 
 .staff-tab-btn:hover {
-  border-color: #6366f1;
-  color: #a5b4fc;
+  border-color: #f59e0b;
+  color: #fcd34d;
 }
 
 .staff-tab-btn.active {
-  background-color: #6366f1;
+  background-color: #f59e0b;
   color: white;
-  border-color: #6366f1;
+  border-color: #f59e0b;
 }
