@@ -37,19 +37,23 @@ const AdminDashboard = () => {
 
   return (
     <Layout title="Administrator Dashboard">
-      <div className="dashboard-tabs">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      <div className="dashboard-content">
-        {renderContent()}
+      <div className="dashboard-layout">
+        <aside className="dashboard-sidebar">
+          <nav className="sidebar-nav">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </aside>
+        <main className="dashboard-main">
+          {renderContent()}
+        </main>
       </div>
     </Layout>
   );

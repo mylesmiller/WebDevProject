@@ -1,12 +1,11 @@
 .passenger-dashboard {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
 }
 
 .passenger-info-card,
-.flight-info-card,
-.bag-tracking-card {
+.flight-info-card {
   grid-column: span 1;
 }
 
@@ -17,15 +16,17 @@
 .passenger-details {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #334155;
+  padding: 0.625rem 0.75rem;
+  border-bottom: none;
+  background: #f8fafc;
+  border-radius: 8px;
 }
 
 .detail-item:last-child {
@@ -33,14 +34,14 @@
 }
 
 .detail-label {
-  color: #94a3b8;
+  color: #64748b;
   font-weight: 500;
   font-size: 0.875rem;
 }
 
 .detail-value {
   font-weight: 600;
-  color: #e2e8f0;
+  color: #0f172a;
 }
 
 .flight-details {
@@ -58,20 +59,20 @@
   display: block;
   font-size: 2rem;
   font-weight: bold;
-  color: #fbbf24;
+  color: #0f766e;
 }
 
 .flight-airline {
   display: block;
   font-size: 0.9rem;
-  color: #94a3b8;
+  color: #64748b;
   margin-top: 0.25rem;
 }
 
 .flight-destination {
   display: block;
   font-size: 1rem;
-  color: #cbd5e1;
+  color: #475569;
   margin-top: 0.25rem;
 }
 
@@ -84,7 +85,7 @@
 .terminal-label {
   display: block;
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -94,7 +95,7 @@
   display: block;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #e2e8f0;
+  color: #0f172a;
 }
 
 /* Bag Progress Tracker */
@@ -114,39 +115,41 @@
 }
 
 .step-icon {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background-color: #334155;
-  color: #64748b;
+  background-color: #e2e8f0;
+  color: #94a3b8;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: bold;
+  font-size: 1.1rem;
   transition: all 0.3s;
 }
 
 .progress-step.completed .step-icon {
-  background-color: #f59e0b;
+  background-color: #0f766e;
   color: white;
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.15), 0 2px 8px rgba(15, 118, 110, 0.3);
 }
 
 .step-label {
   font-size: 0.75rem;
-  color: #64748b;
+  color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .progress-step.completed .step-label {
-  color: #fbbf24;
+  color: #0f766e;
   font-weight: 600;
 }
 
 .progress-line {
   width: 60px;
   height: 3px;
-  background-color: #334155;
+  background-color: #e2e8f0;
   margin: 0 0.5rem;
   margin-bottom: 1.5rem;
   border-radius: 2px;
@@ -158,12 +161,12 @@
 }
 
 .progress-complete {
-  color: #fbbf24;
+  color: #0f766e;
   font-weight: 600;
 }
 
 .progress-in-transit {
-  color: #fbbf24;
+  color: #0f766e;
   font-weight: 600;
 }
 
@@ -171,7 +174,7 @@
 .no-bags {
   text-align: center;
   padding: 2rem;
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .no-bags .hint {
@@ -192,9 +195,9 @@
 
 .quick-info-list li {
   padding: 0.5rem 0;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid #e2e8f0;
   font-size: 0.9rem;
-  color: #e2e8f0;
+  color: #0f172a;
 }
 
 .quick-info-list li:last-child {
@@ -202,7 +205,14 @@
 }
 
 .no-data {
-  color: #64748b;
+  color: #94a3b8;
   text-align: center;
   padding: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .passenger-dashboard {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,9 +1,9 @@
 .table-container {
   overflow-x: auto;
-  background: #1e293b;
+  background: #ffffff;
   border-radius: 12px;
-  border: 1px solid #334155;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .data-table {
@@ -15,14 +15,14 @@
 .data-table td {
   padding: 0.75rem 1rem;
   text-align: left;
-  border-bottom: 1px solid #334155;
-  color: #e2e8f0;
+  border-bottom: 1px solid #f1f5f9;
+  color: #0f172a;
 }
 
 .data-table th {
-  background-color: #0f172a;
+  background-color: #f8fafc;
   font-weight: 600;
-  color: #94a3b8;
+  color: #475569;
   white-space: nowrap;
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -30,7 +30,7 @@
 }
 
 .data-table tbody tr:hover {
-  background-color: rgba(245, 158, 11, 0.05);
+  background-color: #f0fdfa;
 }
 
 .data-table tbody tr:last-child td {
@@ -39,7 +39,7 @@
 
 .empty-row {
   text-align: center;
-  color: #64748b;
+  color: #94a3b8;
   padding: 2rem !important;
 }
 
@@ -59,7 +59,7 @@
 .status-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  border-radius: 6px;
+  border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -67,51 +67,44 @@
 }
 
 .status-not-checked-in {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: #fee2e2;
+  color: #991b1b;
 }
 
 .status-checked-in {
-  background-color: rgba(245, 158, 11, 0.15);
-  color: #fcd34d;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
 .status-boarded {
-  background-color: rgba(34, 197, 94, 0.15);
-  color: #86efac;
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background-color: #dcfce7;
+  color: #166534;
 }
 
 .location-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  border-radius: 6px;
+  border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 500;
 }
 
 .location-checkin {
-  background-color: rgba(245, 158, 11, 0.15);
-  color: #fcd34d;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
 .location-security {
-  background-color: rgba(245, 158, 11, 0.15);
-  color: #fcd34d;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
 .location-gate {
-  background-color: rgba(6, 182, 212, 0.15);
-  color: #67e8f9;
-  border: 1px solid rgba(6, 182, 212, 0.3);
+  background-color: #e0f2fe;
+  color: #075985;
 }
 
 .location-loaded {
-  background-color: rgba(34, 197, 94, 0.15);
-  color: #86efac;
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background-color: #dcfce7;
+  color: #166534;
 }

@@ -269,81 +269,85 @@ const GateStaffDashboard = () => {
         </div>
       )}
 
-      <div className="dashboard-tabs">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <div className="dashboard-layout">
+        <aside className="dashboard-sidebar">
+          <nav className="sidebar-nav">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </aside>
 
-      <div className="dashboard-content">
-        {activeTab === 'passengers' && (
-          <div className="card">
-            <h2>Passengers on Flight {selectedFlight?.airlines}</h2>
-            <DataTable
-              columns={passengerColumns}
-              data={flightPassengers}
-              emptyMessage="No passengers on this flight"
-              actions={(row) => {
-                if (row.status === 'Boarded') {
-                  return <span className="status-badge status-boarded">Boarded</span>;
-                }
-                if (row.status !== 'Checked-in') {
-                  return <span className="status-badge status-not-checked-in">Not Checked-in</span>;
-                }
-                const pBags = getPassengerBags(row.ticketNumber);
-                const allBagsReady = pBags.every(b => b.location.type === 'Gate');
-                return (
-                  <button
-                    className="btn btn-success btn-small"
-                    onClick={() => handleBoardPassenger(row.ticketNumber)}
-                    disabled={!allBagsReady && pBags.length > 0}
-                    title={!allBagsReady && pBags.length > 0 ? 'Not all bags at gate' : 'Board passenger'}
-                  >
-                    {!allBagsReady && pBags.length > 0 ? 'Waiting for Bags' : 'Board'}
-                  </button>
-                );
-              }}
-            />
-          </div>
-        )}
-
-        {activeTab === 'gateChange' && (
-          <div className="card">
-            <h2>Change Gate Assignment</h2>
-            <p className="info-text">
-              Change the gate for flight {selectedFlight?.airlines}. Ground staff will be notified via message board.
-            </p>
-            <form onSubmit={handleGateChangeSubmit}>
-              <FormInput
-                label="New Gate"
-                name="newGate"
-                value={gateChangeData.newGate}
-                onChange={handleGateChangeInput}
-                error={errors.newGate}
-                placeholder="e.g., B15"
-                required
+        <main className="dashboard-main">
+          {activeTab === 'passengers' && (
+            <div className="card">
+              <h2>Passengers on Flight {selectedFlight?.airlines}</h2>
+              <DataTable
+                columns={passengerColumns}
+                data={flightPassengers}
+                emptyMessage="No passengers on this flight"
+                actions={(row) => {
+                  if (row.status === 'Boarded') {
+                    return <span className="status-badge status-boarded">Boarded</span>;
+                  }
+                  if (row.status !== 'Checked-in') {
+                    return <span className="status-badge status-not-checked-in">Not Checked-in</span>;
+                  }
+                  const pBags = getPassengerBags(row.ticketNumber);
+                  const allBagsReady = pBags.every(b => b.location.type === 'Gate');
+                  return (
+                    <button
+                      className="btn btn-success btn-small"
+                      onClick={() => handleBoardPassenger(row.ticketNumber)}
+                      disabled={!allBagsReady && pBags.length > 0}
+                      title={!allBagsReady && pBags.length > 0 ? 'Not all bags at gate' : 'Board passenger'}
+                    >
+                      {!allBagsReady && pBags.length > 0 ? 'Waiting for Bags' : 'Board'}
+                    </button>
+                  );
+                }}
               />
-              <div className="form-actions">
-                <button type="submit" className="btn btn-primary">
-                  Update Gate
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
+            </div>
+          )}
 
-        {activeTab === 'messages' && (
-          <MessageBoard
-            boardType="gateStaff"
-            title="Gate Staff Message Board"
-          />
-        )}
+          {activeTab === 'gateChange' && (
+            <div className="card">
+              <h2>Change Gate Assignment</h2>
+              <p className="info-text">
+                Change the gate for flight {selectedFlight?.airlines}. Ground staff will be notified via message board.
+              </p>
+              <form onSubmit={handleGateChangeSubmit}>
+                <FormInput
+                  label="New Gate"
+                  name="newGate"
+                  value={gateChangeData.newGate}
+                  onChange={handleGateChangeInput}
+                  error={errors.newGate}
+                  placeholder="e.g., B15"
+                  required
+                />
+                <div className="form-actions">
+                  <button type="submit" className="btn btn-primary">
+                    Update Gate
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {activeTab === 'messages' && (
+            <MessageBoard
+              boardType="gateStaff"
+              title="Gate Staff Message Board"
+            />
+          )}
+        </main>
       </div>
     </Layout>
   );

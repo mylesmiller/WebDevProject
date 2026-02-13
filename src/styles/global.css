@@ -47,8 +47,8 @@ code {
 }
 
 .status-success {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: #dcfce7;
+  color: #166534;
 }
 
 .status-warning {
@@ -62,30 +62,30 @@ code {
 }
 
 .status-info {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: #e0f2fe;
+  color: #075985;
 }
 
 .status-pending {
-  background-color: #f5f0e8;
-  color: #57534e;
+  background-color: #f1f5f9;
+  color: #475569;
 }
 
 .error-message {
-  background-color: #fee2e2;
+  background-color: #fef2f2;
   color: #991b1b;
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
-  border: 1px solid #fca5a5;
+  border: 1px solid #fecaca;
   margin-bottom: var(--spacing-md);
 }
 
 .success-message {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: #f0fdf4;
+  color: #166534;
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
-  border: 1px solid #86efac;
+  border: 1px solid #bbf7d0;
   margin-bottom: var(--spacing-md);
 }
 

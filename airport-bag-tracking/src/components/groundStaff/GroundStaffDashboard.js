@@ -284,129 +284,133 @@ const GroundStaffDashboard = () => {
           </div>
         </div>
 
-        <div className="dashboard-tabs">
-          {securityTabs.map(tab => (
-            <button
-              key={tab.id}
-              className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <div className="dashboard-layout">
+          <aside className="dashboard-sidebar">
+            <nav className="sidebar-nav">
+              {securityTabs.map(tab => (
+                <button
+                  key={tab.id}
+                  className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </aside>
 
-        <div className="dashboard-content">
-          {activeTab === 'checkin' && (
-            <div className="card">
-              <h2>Bags from Check-in</h2>
-              <p className="info-text">These bags need to be moved to Security Check.</p>
-              <DataTable
-                columns={bagColumns}
-                data={bagsAtCheckIn}
-                emptyMessage="No bags waiting from check-in"
-                actions={(row) => (
-                  <button
-                    className="btn btn-primary btn-small"
-                    onClick={() => {
-                      updateBagLocation(row.bagId, { type: 'Security' });
-                    }}
-                  >
-                    Send to Security
-                  </button>
-                )}
-              />
-            </div>
-          )}
-
-          {activeTab === 'security' && (
-            <div className="card">
-              <h2>Bags at Security Check</h2>
-              <p className="info-text">After clearance, send bags to their designated gate.</p>
-              <DataTable
-                columns={bagColumns}
-                data={bagsAtSecurity}
-                emptyMessage="No bags at security"
-                actions={(row) => {
-                  const passenger = passengers.find(p => p.ticketNumber === row.ticketNumber);
-                  const flight = passenger ? flights.find(f => f.airlines === passenger.flight) : null;
-                  return (
-                    <div className="action-buttons">
-                      <button
-                        className="btn btn-success btn-small"
-                        onClick={() => {
-                          if (flight) {
-                            updateBagLocation(row.bagId, {
-                              type: 'Gate',
-                              terminal: flight.gate[0],
-                              number: flight.gate.substring(1)
-                            });
-                          }
-                        }}
-                        disabled={!flight}
-                      >
-                        {flight ? `Clear → Gate ${flight.gate}` : 'No Flight Info'}
-                      </button>
-                      <button
-                        className="btn btn-warning btn-small"
-                        onClick={() => {
-                          setViolationData({ bagId: row.bagId, reason: '' });
-                          setActiveTab('violation');
-                        }}
-                      >
-                        Flag Violation
-                      </button>
-                    </div>
-                  );
-                }}
-              />
-            </div>
-          )}
-
-          {activeTab === 'violation' && (
-            <div className="card">
-              <h2>Report Security Violation</h2>
-              <form onSubmit={handleReportViolation}>
-                <FormInput
-                  label="Bag ID"
-                  name="bagId"
-                  value={violationData.bagId}
-                  onChange={handleViolationChange}
-                  error={errors.bagId}
-                  placeholder="6-digit bag ID"
-                  maxLength={6}
-                  required
+          <main className="dashboard-main">
+            {activeTab === 'checkin' && (
+              <div className="card">
+                <h2>Bags from Check-in</h2>
+                <p className="info-text">These bags need to be moved to Security Check.</p>
+                <DataTable
+                  columns={bagColumns}
+                  data={bagsAtCheckIn}
+                  emptyMessage="No bags waiting from check-in"
+                  actions={(row) => (
+                    <button
+                      className="btn btn-primary btn-small"
+                      onClick={() => {
+                        updateBagLocation(row.bagId, { type: 'Security' });
+                      }}
+                    >
+                      Send to Security
+                    </button>
+                  )}
                 />
-                <div className="form-group">
-                  <label>Reason for Violation <span className="required">*</span></label>
-                  <textarea
-                    name="reason"
-                    value={violationData.reason}
-                    onChange={handleViolationChange}
-                    placeholder="Describe the security violation..."
-                    rows={4}
-                    className={errors.reason ? 'error' : ''}
-                  />
-                  {errors.reason && <span className="error-message">{errors.reason}</span>}
-                </div>
-                <div className="form-actions">
-                  <button type="submit" className="btn btn-warning">
-                    Report Violation
-                  </button>
-                </div>
-              </form>
-              <p className="info-text">
-                This will notify Airline Staff about the violation. They will inform the Administrator to remove the bag and passenger from the system.
-              </p>
-            </div>
-          )}
+              </div>
+            )}
 
-          {activeTab === 'messages' && (
-            <MessageBoard
-              boardType="groundStaff"
-              title="Ground Staff Message Board"
-            />
-          )}
+            {activeTab === 'security' && (
+              <div className="card">
+                <h2>Bags at Security Check</h2>
+                <p className="info-text">After clearance, send bags to their designated gate.</p>
+                <DataTable
+                  columns={bagColumns}
+                  data={bagsAtSecurity}
+                  emptyMessage="No bags at security"
+                  actions={(row) => {
+                    const passenger = passengers.find(p => p.ticketNumber === row.ticketNumber);
+                    const flight = passenger ? flights.find(f => f.airlines === passenger.flight) : null;
+                    return (
+                      <div className="action-buttons">
+                        <button
+                          className="btn btn-success btn-small"
+                          onClick={() => {
+                            if (flight) {
+                              updateBagLocation(row.bagId, {
+                                type: 'Gate',
+                                terminal: flight.gate[0],
+                                number: flight.gate.substring(1)
+                              });
+                            }
+                          }}
+                          disabled={!flight}
+                        >
+                          {flight ? `Clear → Gate ${flight.gate}` : 'No Flight Info'}
+                        </button>
+                        <button
+                          className="btn btn-warning btn-small"
+                          onClick={() => {
+                            setViolationData({ bagId: row.bagId, reason: '' });
+                            setActiveTab('violation');
+                          }}
+                        >
+                          Flag Violation
+                        </button>
+                      </div>
+                    );
+                  }}
+                />
+              </div>
+            )}
+
+            {activeTab === 'violation' && (
+              <div className="card">
+                <h2>Report Security Violation</h2>
+                <form onSubmit={handleReportViolation}>
+                  <FormInput
+                    label="Bag ID"
+                    name="bagId"
+                    value={violationData.bagId}
+                    onChange={handleViolationChange}
+                    error={errors.bagId}
+                    placeholder="6-digit bag ID"
+                    maxLength={6}
+                    required
+                  />
+                  <div className="form-group">
+                    <label>Reason for Violation <span className="required">*</span></label>
+                    <textarea
+                      name="reason"
+                      value={violationData.reason}
+                      onChange={handleViolationChange}
+                      placeholder="Describe the security violation..."
+                      rows={4}
+                      className={errors.reason ? 'error' : ''}
+                    />
+                    {errors.reason && <span className="error-message">{errors.reason}</span>}
+                  </div>
+                  <div className="form-actions">
+                    <button type="submit" className="btn btn-warning">
+                      Report Violation
+                    </button>
+                  </div>
+                </form>
+                <p className="info-text">
+                  This will notify Airline Staff about the violation. They will inform the Administrator to remove the bag and passenger from the system.
+                </p>
+              </div>
+            )}
+
+            {activeTab === 'messages' && (
+              <MessageBoard
+                boardType="groundStaff"
+                title="Ground Staff Message Board"
+              />
+            )}
+          </main>
         </div>
       </Layout>
     );
@@ -477,20 +481,22 @@ const GroundStaffDashboard = () => {
       )}
 
       {currentFlight && (
-        <>
-          <div className="dashboard-tabs">
-            {gateTabs.map(tab => (
-              <button
-                key={tab.id}
-                className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        <div className="dashboard-layout">
+          <aside className="dashboard-sidebar">
+            <nav className="sidebar-nav">
+              {gateTabs.map(tab => (
+                <button
+                  key={tab.id}
+                  className={`nav-item ${activeTab === tab.id ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </aside>
 
-          <div className="dashboard-content">
+          <main className="dashboard-main">
             {activeTab === 'gate-bags' && (
               <div className="card">
                 <h2>Bags at Gate {workLocation}</h2>
@@ -569,8 +575,8 @@ const GroundStaffDashboard = () => {
                 title="Ground Staff Message Board"
               />
             )}
-          </div>
-        </>
+          </main>
+        </div>
       )}
 
       {/* Location Change Modal */}

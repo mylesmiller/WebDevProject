@@ -27,7 +27,7 @@
 .form-textarea:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
 }
 
 .form-input.error,
@@ -81,7 +81,7 @@
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #68635c;
+  background-color: #475569;
 }
 
 .btn-success {
@@ -90,7 +90,7 @@
 }
 
 .btn-success:hover:not(:disabled) {
-  background-color: #059669;
+  background-color: #15803d;
 }
 
 .btn-danger {
@@ -99,7 +99,7 @@
 }
 
 .btn-danger:hover:not(:disabled) {
-  background-color: #dc2626;
+  background-color: #b91c1c;
 }
 
 .btn-outline {
