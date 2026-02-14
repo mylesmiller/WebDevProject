@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import FormInput from '../common/FormInput';
 import ErrorMessage from '../common/ErrorMessage';
-import { validateRequired } from '../../utils/validators';
+import { validateRequired, validateLoginForm } from '../../utils/validators';
 import { ROLES } from '../../utils/constants';
 import '../../styles/forms.css';
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({ username: '', password: '' });
+  const [formErrors, setFormErrors] = useState({});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -17,12 +18,25 @@ const LoginForm = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
+    // Clear field-specific error on change
+    if (formErrors[e.target.name]) {
+      setFormErrors({ ...formErrors, [e.target.name]: '' });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setFormErrors({});
     setLoading(true);
+
+    // Validate form before attempting login
+    const errors = validateLoginForm(formData);
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setLoading(false);
+      return;
+    }
 
     try {
       const user = login(formData.username, formData.password);
@@ -67,6 +81,7 @@ const LoginForm = () => {
             value={formData.username}
             onChange={handleChange}
             validator={validateRequired}
+            error={formErrors.username}
             required
           />
 
@@ -77,6 +92,7 @@ const LoginForm = () => {
             value={formData.password}
             onChange={handleChange}
             validator={validateRequired}
+            error={formErrors.password}
             required
           />
 

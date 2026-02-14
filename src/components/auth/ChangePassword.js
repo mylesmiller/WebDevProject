@@ -116,16 +116,44 @@ const ChangePassword = ({ isForced = false }) => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h1 className="auth-title">Change Password</h1>
+    <div style={{ maxWidth: '440px', margin: '0 auto', padding: '2rem' }}>
+      <div className="card" style={{ padding: 'var(--spacing-xl)' }}>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-xl)' }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, var(--primary-color), var(--primary-hover))',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto var(--spacing-md)',
+            fontSize: '1.5rem',
+            color: 'white'
+          }}>
+            🔒
+          </div>
+          <h2 style={{ marginBottom: 'var(--spacing-xs)' }}>Change Password</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>
+            Update your account password
+          </p>
+        </div>
 
         {isForced && (
-          <div className="error-message" style={{ marginBottom: 'var(--spacing-lg)' }}>
-            <strong>Password Change Required</strong>
-            <p style={{ marginTop: 'var(--spacing-sm)', marginBottom: 0 }}>
+          <div style={{
+            background: '#fff7ed',
+            border: '1px solid #fed7aa',
+            borderRadius: 'var(--radius-md)',
+            padding: 'var(--spacing-md)',
+            marginBottom: 'var(--spacing-lg)',
+            color: '#9a3412'
+          }}>
+            <strong style={{ display: 'block', marginBottom: 'var(--spacing-xs)' }}>
+              Password Change Required
+            </strong>
+            <span style={{ fontSize: 'var(--text-sm)' }}>
               For security reasons, you must change your auto-generated password before continuing.
-            </p>
+            </span>
           </div>
         )}
 
@@ -164,16 +192,17 @@ const ChangePassword = ({ isForced = false }) => {
             required
           />
 
-          <div className="btn-group">
-            <button type="submit" className="btn btn-primary">
-              Change Password
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', marginTop: 'var(--spacing-lg)' }}>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: 'var(--spacing-sm) var(--spacing-lg)' }}>
+              Update Password
             </button>
             <button
               type="button"
-              className="btn btn-secondary"
+              className="btn btn-outline"
+              style={{ width: '100%' }}
               onClick={handleCancel}
             >
-              {isForced ? 'Logout' : 'Cancel'}
+              {isForced ? 'Logout Instead' : 'Cancel'}
             </button>
           </div>
         </form>

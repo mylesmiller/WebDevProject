@@ -5,7 +5,7 @@ import Table from '../common/Table';
 import ConfirmDialog from '../common/ConfirmDialog';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
-import { validateName, validateEmail, validatePhone } from '../../utils/validators';
+import { validateName, validateEmail, validatePhone, validateStaffForm } from '../../utils/validators';
 import { ROLES, AIRLINES } from '../../utils/constants';
 import { getRoleDisplayName } from '../../utils/helpers';
 import '../../styles/dashboard.css';
@@ -22,6 +22,7 @@ const StaffManagement = () => {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [formErrors, setFormErrors] = useState({});
   const [credentials, setCredentials] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, staffId: null });
 
@@ -31,12 +32,24 @@ const StaffManagement = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
     setSuccess('');
+    if (formErrors[e.target.name]) {
+      setFormErrors({ ...formErrors, [e.target.name]: '' });
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setFormErrors({});
+
+    // Validate all fields before submission
+    const errors = validateStaffForm(formData);
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setError('Please fix the validation errors below');
+      return;
+    }
 
     try {
       const newStaff = addStaff(formData);
@@ -137,6 +150,7 @@ const StaffManagement = () => {
                 value={formData.name}
                 onChange={handleChange}
                 validator={validateName}
+                error={formErrors.name}
                 placeholder="e.g., John Doe"
                 required
               />
@@ -148,7 +162,7 @@ const StaffManagement = () => {
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  className="form-select"
+                  className={`form-select ${formErrors.role ? 'error' : ''}`}
                   required
                 >
                   <option value="">Select a role</option>
@@ -156,6 +170,7 @@ const StaffManagement = () => {
                   <option value={ROLES.GATE_STAFF}>Gate Staff</option>
                   <option value={ROLES.GROUND_STAFF}>Ground Staff</option>
                 </select>
+                {formErrors.role && <div className="form-error">{formErrors.role}</div>}
               </div>
               {requiresAirline && (
                 <div className="form-group">
@@ -166,7 +181,7 @@ const StaffManagement = () => {
                     name="airline"
                     value={formData.airline}
                     onChange={handleChange}
-                    className="form-select"
+                    className={`form-select ${formErrors.airline ? 'error' : ''}`}
                     required
                   >
                     <option value="">Select an airline</option>
@@ -176,6 +191,7 @@ const StaffManagement = () => {
                       </option>
                     ))}
                   </select>
+                  {formErrors.airline && <div className="form-error">{formErrors.airline}</div>}
                 </div>
               )}
               <FormInput
@@ -185,6 +201,7 @@ const StaffManagement = () => {
                 value={formData.email}
                 onChange={handleChange}
                 validator={validateEmail}
+                error={formErrors.email}
                 placeholder="e.g., john@email.com"
                 required
               />
@@ -194,7 +211,8 @@ const StaffManagement = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 validator={validatePhone}
-                placeholder="10 digits, first digit not 0"
+                error={formErrors.phone}
+                placeholder="10 digits"
                 required
               />
             </div>

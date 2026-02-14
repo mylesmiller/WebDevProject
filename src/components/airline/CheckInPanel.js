@@ -31,6 +31,13 @@ const CheckInPanel = () => {
     setSuccess('');
     setPassenger(null);
 
+    // Validate ticket number format before searching
+    const ticketError = validateTicketNumber(ticketNumber);
+    if (ticketError) {
+      setError(ticketError);
+      return;
+    }
+
     try {
       const foundPassenger = getPassengerByTicket(ticketNumber);
 
@@ -69,6 +76,13 @@ const CheckInPanel = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    // Validate bag ID format before adding
+    const bagError = validateBagId(bagId);
+    if (bagError) {
+      setError(bagError);
+      return;
+    }
 
     try {
       addBag({ bagId, ticketNumber: passenger.ticketNumber }, currentUser.id);

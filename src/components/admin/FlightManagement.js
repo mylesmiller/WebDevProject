@@ -7,7 +7,7 @@ import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
-import { validateFlightNumber, validateGate } from '../../utils/validators';
+import { validateFlightNumber, validateGate, validateFlightForm, validateRequired } from '../../utils/validators';
 import { formatDate, extractAirlineCode, getAirlineName } from '../../utils/helpers';
 import { MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
 import '../../styles/dashboard.css';
@@ -25,6 +25,7 @@ const FlightManagement = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, flightId: null });
+  const [formErrors, setFormErrors] = useState({});
   const [gateChangeModal, setGateChangeModal] = useState({ isOpen: false, flight: null });
   const [newGate, setNewGate] = useState('');
 
@@ -34,12 +35,24 @@ const FlightManagement = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
     setSuccess('');
+    if (formErrors[e.target.name]) {
+      setFormErrors({ ...formErrors, [e.target.name]: '' });
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setFormErrors({});
+
+    // Validate all fields before submission
+    const errors = validateFlightForm(formData);
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setError('Please fix the validation errors below');
+      return;
+    }
 
     try {
       const airline = extractAirlineCode(formData.flightNumber);
@@ -54,6 +67,7 @@ const FlightManagement = () => {
 
       setSuccess('Flight added successfully');
       setFormData({ flightNumber: '', gate: '', destination: '', departureTime: '' });
+      setFormErrors({});
       setShowForm(false);
     } catch (err) {
       setError(err.message);
@@ -163,6 +177,7 @@ const FlightManagement = () => {
                 value={formData.flightNumber}
                 onChange={handleChange}
                 validator={validateFlightNumber}
+                error={formErrors.flightNumber}
                 placeholder="e.g., AA1234"
                 required
               />
@@ -172,6 +187,7 @@ const FlightManagement = () => {
                 value={formData.gate}
                 onChange={handleChange}
                 validator={validateGate}
+                error={formErrors.gate}
                 placeholder="e.g., A12"
                 required
               />
@@ -180,7 +196,10 @@ const FlightManagement = () => {
                 name="destination"
                 value={formData.destination}
                 onChange={handleChange}
+                validator={(v) => validateRequired(v, 'Destination')}
+                error={formErrors.destination}
                 placeholder="e.g., New York (JFK)"
+                required
               />
               <FormInput
                 label="Departure Time"
@@ -188,6 +207,9 @@ const FlightManagement = () => {
                 type="datetime-local"
                 value={formData.departureTime}
                 onChange={handleChange}
+                validator={(v) => validateRequired(v, 'Departure time')}
+                error={formErrors.departureTime}
+                required
               />
             </div>
             <button type="submit" className="btn btn-primary mt-md">

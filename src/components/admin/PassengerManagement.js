@@ -9,7 +9,10 @@ import SuccessMessage from '../common/SuccessMessage';
 import {
   validatePassengerId,
   validateTicketNumber,
-  validateName
+  validateName,
+  validatePassengerForm,
+  validateEmailOptional,
+  validatePhoneOptional
 } from '../../utils/validators';
 import { getPassengerStatusDisplayName } from '../../utils/helpers';
 import '../../styles/dashboard.css';
@@ -28,6 +31,7 @@ const PassengerManagement = () => {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [formErrors, setFormErrors] = useState({});
   const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, passengerId: null });
 
   const passengers = getAllPassengers();
@@ -37,12 +41,24 @@ const PassengerManagement = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
     setSuccess('');
+    if (formErrors[e.target.name]) {
+      setFormErrors({ ...formErrors, [e.target.name]: '' });
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setFormErrors({});
+
+    // Validate all fields before submission
+    const errors = validatePassengerForm(formData);
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setError('Please fix the validation errors below');
+      return;
+    }
 
     try {
       addPassenger(formData);
@@ -55,6 +71,7 @@ const PassengerManagement = () => {
         email: '',
         phone: ''
       });
+      setFormErrors({});
       setShowForm(false);
     } catch (err) {
       setError(err.message);
@@ -125,6 +142,7 @@ const PassengerManagement = () => {
                 value={formData.name}
                 onChange={handleChange}
                 validator={validateName}
+                error={formErrors.name}
                 placeholder="e.g., John Smith"
                 required
               />
@@ -134,6 +152,7 @@ const PassengerManagement = () => {
                 value={formData.passengerId}
                 onChange={handleChange}
                 validator={validatePassengerId}
+                error={formErrors.passengerId}
                 placeholder="6 digits"
                 required
               />
@@ -143,6 +162,7 @@ const PassengerManagement = () => {
                 value={formData.ticketNumber}
                 onChange={handleChange}
                 validator={validateTicketNumber}
+                error={formErrors.ticketNumber}
                 placeholder="10 digits"
                 required
               />
@@ -154,7 +174,7 @@ const PassengerManagement = () => {
                   name="flightId"
                   value={formData.flightId}
                   onChange={handleChange}
-                  className="form-select"
+                  className={`form-select ${formErrors.flightId ? 'error' : ''}`}
                   required
                 >
                   <option value="">Select a flight</option>
@@ -164,6 +184,7 @@ const PassengerManagement = () => {
                     </option>
                   ))}
                 </select>
+                {formErrors.flightId && <div className="form-error">{formErrors.flightId}</div>}
               </div>
               <FormInput
                 label="Email"
@@ -171,6 +192,8 @@ const PassengerManagement = () => {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
+                validator={validateEmailOptional}
+                error={formErrors.email}
                 placeholder="e.g., john@email.com"
               />
               <FormInput
@@ -178,7 +201,9 @@ const PassengerManagement = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="10 digits, first digit not 0"
+                validator={validatePhoneOptional}
+                error={formErrors.phone}
+                placeholder="10 digits"
               />
             </div>
             <button type="submit" className="btn btn-primary mt-md">

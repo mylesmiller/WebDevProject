@@ -38,6 +38,18 @@ const BoardingPanel = () => {
     setError('');
     setSuccess('');
 
+    // Validate flight consistency - passenger's flight must match selected gate flight
+    const passenger = getPassengersByFlight(selectedFlight.id).find(p => p.id === passengerId);
+    if (!passenger) {
+      setError('Passenger is not assigned to this flight. Flight information is inconsistent.');
+      return;
+    }
+
+    if (passenger.flightId !== selectedFlight.id) {
+      setError(`Flight mismatch: Passenger is on flight ${passenger.flightId} but gate is serving flight ${selectedFlight.flightNumber}. Cannot board.`);
+      return;
+    }
+
     // Check if all bags are loaded
     if (!areAllBagsLoaded(selectedFlight.id)) {
       setError('Cannot board passengers until all bags are loaded');

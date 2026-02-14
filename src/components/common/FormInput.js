@@ -12,17 +12,23 @@ const FormInput = ({
   required = false,
   placeholder = '',
   disabled = false,
+  error: externalError,
+  helpText,
   ...props
 }) => {
-  const [error, setError] = useState('');
+  const [internalError, setInternalError] = useState('');
   const [touched, setTouched] = useState(false);
+
+  // External error takes priority over internal validation error
+  const error = externalError || internalError;
+  const showError = error && (touched || externalError);
 
   const handleBlur = (e) => {
     setTouched(true);
 
     if (validator) {
       const errorMsg = validator(value);
-      setError(errorMsg || '');
+      setInternalError(errorMsg || '');
     }
 
     if (onBlur) {
@@ -36,7 +42,7 @@ const FormInput = ({
     // Clear error on change if field was touched
     if (touched && validator) {
       const errorMsg = validator(e.target.value);
-      setError(errorMsg || '');
+      setInternalError(errorMsg || '');
     }
   };
 
@@ -57,10 +63,15 @@ const FormInput = ({
         onBlur={handleBlur}
         placeholder={placeholder}
         disabled={disabled}
-        className={`form-input ${error && touched ? 'error' : ''}`}
+        className={`form-input ${showError ? 'error' : ''}`}
         {...props}
       />
-      {error && touched && <div className="form-error">{error}</div>}
+      {helpText && !showError && (
+        <div className="form-help" style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginTop: '4px' }}>
+          {helpText}
+        </div>
+      )}
+      {showError && <div className="form-error">{error}</div>}
     </div>
   );
 };

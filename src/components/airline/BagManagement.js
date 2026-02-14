@@ -35,6 +35,13 @@ const BagManagement = () => {
     setFlight(null);
     setAddedBag(null);
 
+    // Validate ticket number format before searching
+    const ticketError = validateTicketNumber(ticketNumber);
+    if (ticketError) {
+      setError(ticketError);
+      return;
+    }
+
     try {
       const foundPassenger = getPassengerByTicket(ticketNumber);
 
@@ -66,6 +73,13 @@ const BagManagement = () => {
     setError('');
     setSuccess('');
     setAddedBag(null);
+
+    // Validate bag ID format before adding
+    const bagError = validateBagId(bagId);
+    if (bagError) {
+      setError(bagError);
+      return;
+    }
 
     try {
       const newBag = addBag({ bagId, ticketNumber: passenger.ticketNumber }, currentUser.id);

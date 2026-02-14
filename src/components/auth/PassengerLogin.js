@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import FormInput from '../common/FormInput';
 import ErrorMessage from '../common/ErrorMessage';
-import { validatePassengerId, validateTicketNumber } from '../../utils/validators';
+import { validatePassengerId, validateTicketNumber, validatePassengerLoginForm } from '../../utils/validators';
 import '../../styles/forms.css';
 
 const PassengerLogin = () => {
   const [formData, setFormData] = useState({ passengerId: '', ticketNumber: '' });
+  const [formErrors, setFormErrors] = useState({});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { loginPassenger } = useAuth();
@@ -16,12 +17,24 @@ const PassengerLogin = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
+    if (formErrors[e.target.name]) {
+      setFormErrors({ ...formErrors, [e.target.name]: '' });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setFormErrors({});
     setLoading(true);
+
+    // Validate form before attempting login
+    const errors = validatePassengerLoginForm(formData);
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setLoading(false);
+      return;
+    }
 
     try {
       loginPassenger(formData.passengerId, formData.ticketNumber);
@@ -49,6 +62,7 @@ const PassengerLogin = () => {
             value={formData.passengerId}
             onChange={handleChange}
             validator={validatePassengerId}
+            error={formErrors.passengerId}
             placeholder="6 digits"
             required
           />
@@ -59,6 +73,7 @@ const PassengerLogin = () => {
             value={formData.ticketNumber}
             onChange={handleChange}
             validator={validateTicketNumber}
+            error={formErrors.ticketNumber}
             placeholder="10 digits"
             required
           />

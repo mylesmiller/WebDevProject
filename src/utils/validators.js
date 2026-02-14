@@ -8,10 +8,10 @@ const ERROR_MESSAGES = {
   PASSENGER_ID: 'Passenger ID must be exactly 6 digits',
   FLIGHT_NUMBER: 'Flight number must be 2 uppercase letters followed by 4 digits (e.g., AA1234)',
   AIRLINE_CODE: 'Airline code must be 2 uppercase letters',
-  USERNAME: 'Username must be at least 2 letters followed by at least 2 digits',
+  USERNAME: 'Username must be formed using lastname and two digits (e.g., smith01)',
   PASSWORD: 'Password must be at least 6 characters with 1 uppercase, 1 lowercase, and 1 number',
-  EMAIL: 'Email must be in format XXX@XXX.XXX',
-  PHONE: 'Phone must be 10 digits, first digit cannot be 0',
+  EMAIL: 'Email must be in format XXXX@XXX.XX (e.g., john@email.com)',
+  PHONE: 'Phone number must be exactly 10 digits',
   NAME: 'Name must be at least 2 letters',
   GATE: 'Gate is required (e.g., A12, B5)'
 };
@@ -63,8 +63,30 @@ export const validatePassword = (value) =>
 export const validateEmail = (value) =>
   validate(value, PATTERNS.EMAIL, ERROR_MESSAGES.EMAIL);
 
+// Optional email validator - only validates format if value is provided
+export const validateEmailOptional = (value) => {
+  if (!value || value.toString().trim() === '') {
+    return null; // Optional, so empty is OK
+  }
+  if (!PATTERNS.EMAIL.test(value.toString().trim())) {
+    return ERROR_MESSAGES.EMAIL;
+  }
+  return null;
+};
+
 export const validatePhone = (value) =>
   validate(value, PATTERNS.PHONE, ERROR_MESSAGES.PHONE);
+
+// Optional phone validator - only validates format if value is provided
+export const validatePhoneOptional = (value) => {
+  if (!value || value.toString().trim() === '') {
+    return null; // Optional, so empty is OK
+  }
+  if (!PATTERNS.PHONE.test(value.toString().trim())) {
+    return ERROR_MESSAGES.PHONE;
+  }
+  return null;
+};
 
 export const validateName = (value) =>
   validate(value, PATTERNS.NAME, ERROR_MESSAGES.NAME);
@@ -91,74 +113,106 @@ export const validateRequired = (value, fieldName = 'This field') => {
 export const validateFlightForm = (formData) => {
   const errors = {};
 
-  errors.airline = validateAirlineCode(formData.airline);
-  errors.flightNumber = validateFlightNumber(formData.flightNumber);
-  errors.gate = validateGate(formData.gate);
+  const flightNumError = validateFlightNumber(formData.flightNumber);
+  if (flightNumError) errors.flightNumber = flightNumError;
 
-  return Object.fromEntries(
-    Object.entries(errors).filter(([_, v]) => v !== null)
-  );
+  const gateError = validateGate(formData.gate);
+  if (gateError) errors.gate = gateError;
+
+  // Destination is required
+  const destError = validateRequired(formData.destination, 'Destination');
+  if (destError) errors.destination = destError;
+
+  // Departure time is required
+  const timeError = validateRequired(formData.departureTime, 'Departure time');
+  if (timeError) errors.departureTime = timeError;
+
+  return errors;
 };
 
 export const validatePassengerForm = (formData) => {
   const errors = {};
 
-  errors.name = validateName(formData.name);
-  errors.passengerId = validatePassengerId(formData.passengerId);
-  errors.ticketNumber = validateTicketNumber(formData.ticketNumber);
-  errors.flightId = validateRequired(formData.flightId, 'Flight');
+  const nameError = validateName(formData.name);
+  if (nameError) errors.name = nameError;
 
-  return Object.fromEntries(
-    Object.entries(errors).filter(([_, v]) => v !== null)
-  );
+  const idError = validatePassengerId(formData.passengerId);
+  if (idError) errors.passengerId = idError;
+
+  const ticketError = validateTicketNumber(formData.ticketNumber);
+  if (ticketError) errors.ticketNumber = ticketError;
+
+  const flightError = validateRequired(formData.flightId, 'Flight');
+  if (flightError) errors.flightId = flightError;
+
+  // Validate email if provided (optional field)
+  const emailError = validateEmailOptional(formData.email);
+  if (emailError) errors.email = emailError;
+
+  // Validate phone if provided (optional field)
+  const phoneError = validatePhoneOptional(formData.phone);
+  if (phoneError) errors.phone = phoneError;
+
+  return errors;
 };
 
 export const validateStaffForm = (formData) => {
   const errors = {};
 
-  errors.name = validateName(formData.name);
-  errors.email = validateEmail(formData.email);
-  errors.phone = validatePhone(formData.phone);
-  errors.role = validateRequired(formData.role, 'Role');
+  const nameError = validateName(formData.name);
+  if (nameError) errors.name = nameError;
+
+  const roleError = validateRequired(formData.role, 'Role');
+  if (roleError) errors.role = roleError;
+
+  const emailError = validateEmail(formData.email);
+  if (emailError) errors.email = emailError;
+
+  const phoneError = validatePhone(formData.phone);
+  if (phoneError) errors.phone = phoneError;
 
   if (formData.role === 'airline_staff' || formData.role === 'gate_staff') {
-    errors.airline = validateAirlineCode(formData.airline);
+    const airlineError = validateRequired(formData.airline, 'Airline');
+    if (airlineError) errors.airline = airlineError;
   }
 
-  return Object.fromEntries(
-    Object.entries(errors).filter(([_, v]) => v !== null)
-  );
+  return errors;
 };
 
 export const validateBagForm = (formData) => {
   const errors = {};
 
-  errors.bagId = validateBagId(formData.bagId);
-  errors.ticketNumber = validateTicketNumber(formData.ticketNumber);
+  const bagError = validateBagId(formData.bagId);
+  if (bagError) errors.bagId = bagError;
 
-  return Object.fromEntries(
-    Object.entries(errors).filter(([_, v]) => v !== null)
-  );
+  const ticketError = validateTicketNumber(formData.ticketNumber);
+  if (ticketError) errors.ticketNumber = ticketError;
+
+  return errors;
 };
 
 export const validateLoginForm = (formData) => {
   const errors = {};
 
-  errors.username = validateRequired(formData.username, 'Username');
-  errors.password = validateRequired(formData.password, 'Password');
+  if (!formData.username || formData.username.trim() === '') {
+    errors.username = 'Username is required';
+  }
 
-  return Object.fromEntries(
-    Object.entries(errors).filter(([_, v]) => v !== null)
-  );
+  if (!formData.password || formData.password.trim() === '') {
+    errors.password = 'Password is required';
+  }
+
+  return errors;
 };
 
 export const validatePassengerLoginForm = (formData) => {
   const errors = {};
 
-  errors.passengerId = validatePassengerId(formData.passengerId);
-  errors.ticketNumber = validateTicketNumber(formData.ticketNumber);
+  const idError = validatePassengerId(formData.passengerId);
+  if (idError) errors.passengerId = idError;
 
-  return Object.fromEntries(
-    Object.entries(errors).filter(([_, v]) => v !== null)
-  );
+  const ticketError = validateTicketNumber(formData.ticketNumber);
+  if (ticketError) errors.ticketNumber = ticketError;
+
+  return errors;
 };
