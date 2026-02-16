@@ -119,13 +119,9 @@ export const validateFlightForm = (formData) => {
   const gateError = validateGate(formData.gate);
   if (gateError) errors.gate = gateError;
 
-  // Destination is required
-  const destError = validateRequired(formData.destination, 'Destination');
-  if (destError) errors.destination = destError;
+  // Destination is optional - no validation needed
 
-  // Departure time is required
-  const timeError = validateRequired(formData.departureTime, 'Departure time');
-  if (timeError) errors.departureTime = timeError;
+  // Departure time is optional - no validation needed
 
   return errors;
 };

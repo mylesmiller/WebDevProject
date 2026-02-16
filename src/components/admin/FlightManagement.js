@@ -7,7 +7,7 @@ import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
-import { validateFlightNumber, validateGate, validateFlightForm, validateRequired } from '../../utils/validators';
+import { validateFlightNumber, validateGate, validateFlightForm } from '../../utils/validators';
 import { formatDate, extractAirlineCode, getAirlineName } from '../../utils/helpers';
 import { MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
 import '../../styles/dashboard.css';
@@ -196,10 +196,8 @@ const FlightManagement = () => {
                 name="destination"
                 value={formData.destination}
                 onChange={handleChange}
-                validator={(v) => validateRequired(v, 'Destination')}
                 error={formErrors.destination}
                 placeholder="e.g., New York (JFK)"
-                required
               />
               <FormInput
                 label="Departure Time"
@@ -207,9 +205,7 @@ const FlightManagement = () => {
                 type="datetime-local"
                 value={formData.departureTime}
                 onChange={handleChange}
-                validator={(v) => validateRequired(v, 'Departure time')}
                 error={formErrors.departureTime}
-                required
               />
             </div>
             <button type="submit" className="btn btn-primary mt-md">

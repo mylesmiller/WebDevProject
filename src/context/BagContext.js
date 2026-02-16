@@ -78,7 +78,7 @@ export const BagProvider = ({ children }) => {
     // Save to storage
     bagsData[newBag.id] = newBag;
     StorageService.set(STORAGE_KEYS.BAGS, bagsData);
-    setBags(bagsData);
+    setBags({...bagsData});
 
     // Update passenger bag list
     passenger.bagIds.push(newBag.id);
@@ -117,9 +117,34 @@ export const BagProvider = ({ children }) => {
 
     bagsData[bagId] = bag;
     StorageService.set(STORAGE_KEYS.BAGS, bagsData);
-    setBags(bagsData);
+    setBags({...bagsData});
 
     return bag;
+  }, []);
+
+  // Remove bag
+  const removeBag = useCallback((bagId) => {
+    const bagsData = StorageService.get(STORAGE_KEYS.BAGS) || {};
+    const passengers = StorageService.get(STORAGE_KEYS.PASSENGERS) || {};
+
+    if (!bagsData[bagId]) {
+      throw new Error('Bag not found');
+    }
+
+    const bag = bagsData[bagId];
+
+    // Remove bag from passenger's bagIds array
+    const passenger = passengers[bag.passengerId];
+    if (passenger) {
+      passenger.bagIds = passenger.bagIds.filter(id => id !== bagId);
+      passengers[passenger.id] = passenger;
+      StorageService.set(STORAGE_KEYS.PASSENGERS, passengers);
+    }
+
+    // Remove bag from storage
+    delete bagsData[bagId];
+    StorageService.set(STORAGE_KEYS.BAGS, bagsData);
+    setBags({...bagsData});
   }, []);
 
   // Check if all bags for a flight are loaded
@@ -148,6 +173,7 @@ export const BagProvider = ({ children }) => {
     getBagById,
     getBagsByLocation,
     addBag,
+    removeBag,
     updateBagLocation,
     areAllBagsLoaded,
     getUnloadedBags,

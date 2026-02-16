@@ -15,7 +15,7 @@ const CheckInPanel = () => {
   const { currentUser } = useAuth();
   const { getFlightsByAirline } = useFlights();
   const { getPassengerByTicket, checkInPassenger } = usePassengers();
-  const { addBag } = useBags();
+  const { addBag, getBagsByPassenger } = useBags();
 
   const [ticketNumber, setTicketNumber] = useState('');
   const [passenger, setPassenger] = useState(null);
@@ -133,7 +133,26 @@ const CheckInPanel = () => {
         </form>
       </div>
 
-      {passenger && (
+      {passenger && passenger.status === PASSENGER_STATUS.NOT_CHECKED_IN && (
+        <div className="card">
+          <h3 className="mb-md">Confirm Passenger</h3>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
+            <div>
+              <strong>Name:</strong> {passenger.name}
+            </div>
+            <div>
+              <strong>Ticket Number:</strong> {passenger.ticketNumber}
+            </div>
+          </div>
+
+          <button className="btn btn-success mb-lg" onClick={handleCheckIn}>
+            Check In Passenger
+          </button>
+        </div>
+      )}
+
+      {passenger && passenger.status === PASSENGER_STATUS.CHECKED_IN && (
         <div className="card">
           <h3 className="mb-md">Passenger Details</h3>
 
@@ -174,37 +193,50 @@ const CheckInPanel = () => {
             </div>
           </div>
 
-          {passenger.status === PASSENGER_STATUS.NOT_CHECKED_IN && (
-            <button className="btn btn-success mb-lg" onClick={handleCheckIn}>
-              Check In Passenger
-            </button>
-          )}
-
-          {passenger.status === PASSENGER_STATUS.CHECKED_IN && (
-            <div>
-              <h4 className="mb-md">Add Bag</h4>
-              <form onSubmit={handleAddBag}>
-                <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
-                  <div style={{ flex: 1 }}>
-                    <FormInput
-                      label="Bag ID"
-                      name="bagId"
-                      value={bagId}
-                      onChange={(e) => setBagId(e.target.value)}
-                      validator={validateBagId}
-                      placeholder="6 digits"
-                      required
-                    />
+          {passenger.bagIds.length > 0 && (
+            <div className="mb-lg">
+              <h4 className="mb-md">Checked Bags</h4>
+              {getBagsByPassenger(passenger.id).map(bag => {
+                const bagFlight = getFlightInfo(bag.flightId);
+                return (
+                  <div key={bag.id} className="card mb-sm" style={{ padding: 'var(--spacing-md)', background: 'var(--bg-secondary)' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--spacing-sm)' }}>
+                      <div><strong>Bag ID:</strong> {bag.id}</div>
+                      <div><strong>Ticket:</strong> {bag.ticketNumber}</div>
+                      <div><strong>Flight:</strong> {bagFlight ? bagFlight.flightNumber : '-'}</div>
+                      <div><strong>Destination:</strong> {bagFlight ? (bagFlight.destination || '-') : '-'}</div>
+                      <div><strong>Gate:</strong> {bagFlight ? bagFlight.gate : '-'}</div>
+                      <div><strong>Location:</strong> {bag.location}</div>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 'var(--spacing-md)' }}>
-                    <button type="submit" className="btn btn-primary">
-                      Add Bag
-                    </button>
-                  </div>
-                </div>
-              </form>
+                );
+              })}
             </div>
           )}
+
+          <div>
+            <h4 className="mb-md">Add Bag</h4>
+            <form onSubmit={handleAddBag}>
+              <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+                <div style={{ flex: 1 }}>
+                  <FormInput
+                    label="Bag ID"
+                    name="bagId"
+                    value={bagId}
+                    onChange={(e) => setBagId(e.target.value)}
+                    validator={validateBagId}
+                    placeholder="6 digits"
+                    required
+                  />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 'var(--spacing-md)' }}>
+                  <button type="submit" className="btn btn-primary">
+                    Add Bag
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
