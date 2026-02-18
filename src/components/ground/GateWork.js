@@ -6,13 +6,13 @@ import useFlights from '../../hooks/useFlights';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
 import { BAG_LOCATIONS, PASSENGER_STATUS } from '../../utils/constants';
-import { getBagLocationDisplayName, formatDate, getPassengerStatusDisplayName } from '../../utils/helpers';
+import { getBagLocationDisplayName, getPassengerStatusDisplayName, formatDate } from '../../utils/helpers';
 import '../../styles/dashboard.css';
 
 const GateWork = () => {
   const { currentUser } = useAuth();
-  const { getAllBags, updateBagLocation } = useBags();
-  const { getPassengerById } = usePassengers();
+  const { getAllBags, updateBagLocation, refreshBags } = useBags();
+  const { getPassengerById, refreshPassengers } = usePassengers();
   const { getAllFlights, getFlightById } = useFlights();
   const [selectedGate, setSelectedGate] = useState('');
   const [selectedFlight, setSelectedFlight] = useState(null);
@@ -58,6 +58,13 @@ const GateWork = () => {
     setSuccess('');
   };
 
+  const handleRefresh = () => {
+    refreshPassengers();
+    refreshBags();
+    setError('');
+    setSuccess('Boarding status refreshed.');
+  };
+
   // Get bags at this gate that need to be loaded
   const gateBags = selectedFlight
     ? getAllBags().filter(b => b.flightId === selectedFlight.id && b.location === BAG_LOCATIONS.GATE)
@@ -81,12 +88,12 @@ const GateWork = () => {
       }
 
       if (passenger.status !== PASSENGER_STATUS.BOARDED) {
-        setError(`Cannot load bag ${bag.id}. Passenger ${passenger.name} has not boarded the plane yet (Status: ${getPassengerStatusDisplayName(passenger.status)}).`);
+        setError(`Cannot load bag - passenger ${passenger.name} has not boarded yet (status: ${getPassengerStatusDisplayName(passenger.status)})`);
         return;
       }
 
       updateBagLocation(bag.id, BAG_LOCATIONS.LOADED, currentUser.id);
-      setSuccess(`Bag ${bag.id} loaded onto aircraft. Passenger ${passenger.name} verified as boarded.`);
+      setSuccess(`Bag ${bag.id} loaded onto aircraft for passenger ${passenger.name}.`);
     } catch (err) {
       setError(err.message);
     }
@@ -183,9 +190,14 @@ const GateWork = () => {
           </div>
 
           <div className="card mb-lg">
-            <h3 className="mb-md">Bags to Load ({gateBags.length})</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
+              <h3>Bags to Load ({gateBags.length})</h3>
+              <button className="btn btn-secondary btn-sm" onClick={handleRefresh}>
+                Refresh Boarding Status
+              </button>
+            </div>
             <p className="text-muted mb-md">
-              Load bags one at a time after verifying that the passenger has boarded the plane.
+              Load bags onto the aircraft once the passenger has boarded. Click "Refresh Boarding Status" if a passenger recently boarded in another session.
             </p>
             {gateBags.length === 0 ? (
               <div className="success-message">All bags at this gate have been loaded.</div>
@@ -193,14 +205,13 @@ const GateWork = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
                 {gateBags.map(bag => {
                   const passenger = getPassengerInfo(bag.passengerId);
-                  const isBoarded = passenger && passenger.status === PASSENGER_STATUS.BOARDED;
 
                   return (
                     <div
                       key={bag.id}
                       className="card"
                       style={{
-                        borderLeft: `4px solid ${isBoarded ? 'var(--success-color)' : 'var(--warning-color)'}`
+                        borderLeft: `4px solid ${passenger && passenger.status === PASSENGER_STATUS.BOARDED ? 'var(--success-color)' : 'var(--warning-color)'}`
                       }}
                     >
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-md)' }}>
@@ -215,14 +226,12 @@ const GateWork = () => {
                         </div>
                         <div>
                           <strong>Passenger Status:</strong>{' '}
-                          {passenger ? (
-                            <span className={`status-badge status-${passenger.status}`}>
-                              {getPassengerStatusDisplayName(passenger.status)}
-                            </span>
-                          ) : 'N/A'}
+                          <span className={`status-badge status-${passenger ? passenger.status : 'unknown'}`}>
+                            {passenger ? getPassengerStatusDisplayName(passenger.status) : 'N/A'}
+                          </span>
                         </div>
                       </div>
-                      {isBoarded ? (
+                      {passenger && passenger.status === PASSENGER_STATUS.BOARDED ? (
                         <button
                           className="btn btn-success btn-sm"
                           onClick={() => handleLoadBag(bag)}
@@ -230,8 +239,8 @@ const GateWork = () => {
                           Load onto Aircraft
                         </button>
                       ) : (
-                        <div className="error-message" style={{ margin: 0 }}>
-                          Passenger must board the plane before this bag can be loaded.
+                        <div className="error-message" style={{ fontSize: 'var(--text-sm)' }}>
+                          Waiting for passenger to board before loading bag
                         </div>
                       )}
                     </div>

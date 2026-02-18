@@ -39,7 +39,7 @@ const CheckInPanel = () => {
     }
 
     try {
-      const foundPassenger = getPassengerByTicket(ticketNumber);
+      const foundPassenger = getPassengerByTicket(ticketNumber.trim());
 
       if (!foundPassenger) {
         setError('Passenger not found with this ticket number');
@@ -132,6 +132,27 @@ const CheckInPanel = () => {
           </div>
         </form>
       </div>
+
+      {passenger && passenger.status === PASSENGER_STATUS.BOARDED && (
+        <div className="card">
+          <h3 className="mb-md">Passenger Already Boarded</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
+            <div>
+              <strong>Name:</strong> {passenger.name}
+            </div>
+            <div>
+              <strong>Ticket Number:</strong> {passenger.ticketNumber}
+            </div>
+            <div>
+              <strong>Status:</strong>{' '}
+              <span className={`status-badge status-${passenger.status}`}>
+                {getPassengerStatusDisplayName(passenger.status)}
+              </span>
+            </div>
+          </div>
+          <p className="text-muted">This passenger has already boarded the aircraft.</p>
+        </div>
+      )}
 
       {passenger && passenger.status === PASSENGER_STATUS.NOT_CHECKED_IN && (
         <div className="card">

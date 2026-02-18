@@ -99,11 +99,11 @@ export const BagProvider = ({ children }) => {
 
     const bag = bagsData[bagId];
 
-    // If loading bag, verify passenger is boarded
+    // When loading a bag, verify the passenger has boarded
     if (location === BAG_LOCATIONS.LOADED) {
       const passenger = passengers[bag.passengerId];
       if (!passenger || passenger.status !== PASSENGER_STATUS.BOARDED) {
-        throw new Error('Passenger must be boarded before loading bags');
+        throw new Error('Cannot load bag - passenger has not boarded the plane yet');
       }
     }
 
@@ -165,6 +165,34 @@ export const BagProvider = ({ children }) => {
     );
   }, [bags]);
 
+  // Check if all of a passenger's bags have arrived at the gate (or are already loaded)
+  const arePassengerBagsAtGate = useCallback((passengerId) => {
+    const passengerBags = Object.values(bags).filter(b => b.passengerId === passengerId);
+
+    if (passengerBags.length === 0) {
+      return true; // No bags, passenger can board
+    }
+
+    return passengerBags.every(b =>
+      b.location === BAG_LOCATIONS.GATE || b.location === BAG_LOCATIONS.LOADED
+    );
+  }, [bags]);
+
+  // Check if any of a passenger's bags have a security violation
+  const hasPassengerSecurityViolation = useCallback((passengerId) => {
+    const passengerBags = Object.values(bags).filter(b => b.passengerId === passengerId);
+    return passengerBags.some(b => b.location === BAG_LOCATIONS.SECURITY_VIOLATION);
+  }, [bags]);
+
+  // Get bags not yet at gate for a passenger
+  const getPassengerBagsNotAtGate = useCallback((passengerId) => {
+    return Object.values(bags).filter(
+      b => b.passengerId === passengerId &&
+        b.location !== BAG_LOCATIONS.GATE &&
+        b.location !== BAG_LOCATIONS.LOADED
+    );
+  }, [bags]);
+
   const value = {
     bags,
     getAllBags,
@@ -177,6 +205,9 @@ export const BagProvider = ({ children }) => {
     updateBagLocation,
     areAllBagsLoaded,
     getUnloadedBags,
+    arePassengerBagsAtGate,
+    hasPassengerSecurityViolation,
+    getPassengerBagsNotAtGate,
     refreshBags
   };
 

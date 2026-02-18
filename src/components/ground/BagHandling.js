@@ -7,7 +7,7 @@ import useMessages from '../../hooks/useMessages';
 import Table from '../common/Table';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
-import { BAG_LOCATIONS, PASSENGER_STATUS, MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
+import { BAG_LOCATIONS, MESSAGE_BOARDS, MESSAGE_PRIORITY, PASSENGER_STATUS } from '../../utils/constants';
 import { getBagLocationDisplayName, formatDate } from '../../utils/helpers';
 import '../../styles/dashboard.css';
 
@@ -95,6 +95,7 @@ const BagHandling = () => {
     const flight = getFlightById(flightId);
     return flight ? `${flight.flightNumber} - Gate ${flight.gate}` : 'N/A';
   };
+
 
   const canLoadBag = (bag) => {
     const passenger = getPassengerById(bag.passengerId);
@@ -235,20 +236,18 @@ const BagHandling = () => {
               </>
             )}
             {selectedBag.location === BAG_LOCATIONS.GATE && (
-              <>
-                {canLoadBag(selectedBag) ? (
-                  <button
-                    className="btn btn-success"
-                    onClick={() => handleUpdateLocation(BAG_LOCATIONS.LOADED)}
-                  >
-                    Load onto Aircraft
-                  </button>
-                ) : (
-                  <div className="error-message">
-                    Passenger must be boarded before loading bags
-                  </div>
-                )}
-              </>
+              canLoadBag(selectedBag) ? (
+                <button
+                  className="btn btn-success"
+                  onClick={() => handleUpdateLocation(BAG_LOCATIONS.LOADED)}
+                >
+                  Load onto Aircraft
+                </button>
+              ) : (
+                <div className="error-message">
+                  Cannot load bag - passenger has not boarded the plane yet
+                </div>
+              )
             )}
             {selectedBag.location === BAG_LOCATIONS.LOADED && (
               <div className="success-message">Bag is loaded on aircraft</div>

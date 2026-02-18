@@ -2,19 +2,23 @@ import React, { useState } from 'react';
 import useMessages from '../../hooks/useMessages';
 import usePassengers from '../../hooks/usePassengers';
 import useBags from '../../hooks/useBags';
+import useFlights from '../../hooks/useFlights';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
 import Modal from '../common/Modal';
+import ConfirmDialog from '../common/ConfirmDialog';
 import { MESSAGE_BOARDS } from '../../utils/constants';
 import { formatDate } from '../../utils/helpers';
 import '../../styles/dashboard.css';
 
 const AdminMessages = () => {
   const { getMessagesByBoard, deleteMessage } = useMessages();
-  const { removePassenger, getPassengerById } = usePassengers();
+  const { removePassenger, getPassengerById, getPassengersByFlight } = usePassengers();
   const { getAllBags } = useBags();
+  const { getAllFlights, removeFlight } = useFlights();
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [departureToAcknowledge, setDepartureToAcknowledge] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -93,9 +97,54 @@ const AdminMessages = () => {
     }
   };
 
+  const extractFlightNumber = (messageContent) => {
+    const match = messageContent.match(/Flight\s+([A-Z]{2}\d{3,4})/);
+    return match ? match[1] : null;
+  };
+
   const handleAcknowledgeDeparture = (message) => {
-    deleteMessage(MESSAGE_BOARDS.GATE, message.id);
-    setSuccess('Departure notification acknowledged.');
+    setDepartureToAcknowledge(message);
+  };
+
+  const handleConfirmDeparture = () => {
+    const message = departureToAcknowledge;
+    setDepartureToAcknowledge(null);
+    setError('');
+    setSuccess('');
+
+    try {
+      const flightNumber = extractFlightNumber(message.content);
+      if (!flightNumber) {
+        setError('Unable to extract flight number from departure notification');
+        return;
+      }
+
+      const allFlights = getAllFlights();
+      const flight = allFlights.find(f => f.flightNumber === flightNumber);
+
+      if (!flight) {
+        // Flight may have already been removed; just delete the message
+        deleteMessage(MESSAGE_BOARDS.GATE, message.id);
+        setSuccess(`Departure acknowledged. Flight ${flightNumber} was already removed from the system.`);
+        return;
+      }
+
+      // Remove all passengers on this flight (which cascades to remove their bags)
+      const passengers = getPassengersByFlight(flight.id);
+      passengers.forEach(passenger => {
+        removePassenger(passenger.id);
+      });
+
+      // Remove the flight itself
+      removeFlight(flight.id);
+
+      // Delete the message
+      deleteMessage(MESSAGE_BOARDS.GATE, message.id);
+
+      setSuccess(`Flight ${flightNumber} departed. Removed ${passengers.length} passenger(s) and their bags from the system.`);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -187,6 +236,14 @@ const AdminMessages = () => {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={!!departureToAcknowledge}
+        title="Acknowledge Departure"
+        message={departureToAcknowledge ? `This will remove the flight, all its passengers, and their bags from the system. Are you sure you want to proceed?` : ''}
+        onConfirm={handleConfirmDeparture}
+        onCancel={() => setDepartureToAcknowledge(null)}
+      />
 
       {showModal && selectedMessage && (
         <Modal

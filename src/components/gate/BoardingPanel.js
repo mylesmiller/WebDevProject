@@ -18,7 +18,7 @@ const BoardingPanel = () => {
   const { currentUser } = useAuth();
   const { getFlightsByAirline, updateFlight, changeGate } = useFlights();
   const { getPassengersByFlight, boardPassenger } = usePassengers();
-  const { areAllBagsLoaded, getUnloadedBags } = useBags();
+  const { areAllBagsLoaded, getUnloadedBags, arePassengerBagsAtGate, hasPassengerSecurityViolation, getPassengerBagsNotAtGate, getBagsByPassenger } = useBags();
   const { addMessage } = useMessages();
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [error, setError] = useState('');
@@ -50,9 +50,17 @@ const BoardingPanel = () => {
       return;
     }
 
-    // Check if all bags are loaded
-    if (!areAllBagsLoaded(selectedFlight.id)) {
-      setError('Cannot board passengers until all bags are loaded');
+    // Check if passenger has a security violation on any bag
+    if (hasPassengerSecurityViolation(passengerId)) {
+      setError('Cannot board passenger. One or more bags have a security violation. The passenger must be removed.');
+      return;
+    }
+
+    // Check if all of this passenger's bags have arrived at the gate
+    if (!arePassengerBagsAtGate(passengerId)) {
+      const bagsNotAtGate = getPassengerBagsNotAtGate(passengerId);
+      const bagList = bagsNotAtGate.map(b => `${b.id} (${getBagLocationDisplayName(b.location)})`).join(', ');
+      setError(`Cannot board passenger. Not all bags have arrived at the gate. Pending bags: ${bagList}`);
       return;
     }
 
@@ -191,10 +199,10 @@ const BoardingPanel = () => {
             <div className="mb-lg">
               <h4 className="mb-sm">Bag Status</h4>
               {areAllBagsLoaded(selectedFlight.id) ? (
-                <div className="success-message">All bags are loaded</div>
+                <div className="success-message">All bags are loaded onto aircraft</div>
               ) : (
                 <div className="error-message">
-                  {getUnloadedBags(selectedFlight.id).length} bag(s) not yet loaded
+                  {getUnloadedBags(selectedFlight.id).length} bag(s) not yet loaded onto aircraft
                   <ul style={{ marginTop: 'var(--spacing-sm)' }}>
                     {getUnloadedBags(selectedFlight.id).map(bag => (
                       <li key={bag.id}>
@@ -248,16 +256,34 @@ const BoardingPanel = () => {
                 },
                 { header: 'Bags', render: (row) => row.bagIds.length },
                 {
+                  header: 'Bag Check',
+                  render: (row) => {
+                    if (hasPassengerSecurityViolation(row.id)) {
+                      return <span className="status-badge status-security-violation">Security Violation</span>;
+                    }
+                    if (!arePassengerBagsAtGate(row.id)) {
+                      return <span className="status-badge status-pending">Bags Pending</span>;
+                    }
+                    return <span className="status-badge status-gate">Bags at Gate</span>;
+                  }
+                },
+                {
                   header: 'Actions',
-                  render: (row) => (
-                    <button
-                      className="btn btn-success btn-sm"
-                      onClick={() => handleBoardPassenger(row.id)}
-                      disabled={row.status !== PASSENGER_STATUS.CHECKED_IN}
-                    >
-                      {row.status === PASSENGER_STATUS.BOARDED ? 'Boarded' : 'Board'}
-                    </button>
-                  )
+                  render: (row) => {
+                    const hasSecurity = hasPassengerSecurityViolation(row.id);
+                    const bagsReady = arePassengerBagsAtGate(row.id);
+                    const canBoard = row.status === PASSENGER_STATUS.CHECKED_IN && bagsReady && !hasSecurity;
+
+                    return (
+                      <button
+                        className="btn btn-success btn-sm"
+                        onClick={() => handleBoardPassenger(row.id)}
+                        disabled={!canBoard}
+                      >
+                        {row.status === PASSENGER_STATUS.BOARDED ? 'Boarded' : hasSecurity ? 'Denied' : 'Board'}
+                      </button>
+                    );
+                  }
                 }
               ]}
               data={getPassengersByFlight(selectedFlight.id)}

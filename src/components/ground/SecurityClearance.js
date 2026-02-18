@@ -12,7 +12,7 @@ import '../../styles/dashboard.css';
 
 const SecurityClearance = () => {
   const { currentUser } = useAuth();
-  const { getAllBags, updateBagLocation } = useBags();
+  const { getAllBags, updateBagLocation, refreshBags } = useBags();
   const { getPassengerById } = usePassengers();
   const { getFlightById } = useFlights();
   const { addMessage } = useMessages();
@@ -96,7 +96,12 @@ const SecurityClearance = () => {
       <SuccessMessage message={success} />
 
       <div className="card mb-lg">
-        <h3 className="mb-md">Bags Awaiting Security Check ({bagsAtCheckIn.length})</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
+          <h3>Bags Awaiting Security Check ({bagsAtCheckIn.length})</h3>
+          <button className="btn btn-secondary btn-sm" onClick={() => { refreshBags(); setSuccess('Bag list refreshed.'); }}>
+            Refresh
+          </button>
+        </div>
         {bagsAtCheckIn.length === 0 ? (
           <p className="text-muted text-center">No bags waiting for security check</p>
         ) : (
