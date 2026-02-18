@@ -8,6 +8,7 @@ import '../../styles/dashboard.css';
 const GateStaffDashboard = () => {
   const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('boarding');
+  const [selectedFlight, setSelectedFlight] = useState(null);
 
   return (
     <div className="dashboard-container">
@@ -34,8 +35,8 @@ const GateStaffDashboard = () => {
         </div>
 
         <div>
-          {activeTab === 'boarding' && <BoardingPanel />}
-          {activeTab === 'messages' && <MessageBoard />}
+          {activeTab === 'boarding' && <BoardingPanel selectedFlight={selectedFlight} setSelectedFlight={setSelectedFlight} />}
+          {activeTab === 'messages' && <MessageBoard selectedFlight={selectedFlight} />}
         </div>
       </div>
     </div>

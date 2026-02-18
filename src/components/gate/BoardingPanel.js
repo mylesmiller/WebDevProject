@@ -14,13 +14,12 @@ import { getPassengerStatusDisplayName, formatDate, getBagLocationDisplayName } 
 import { validateGate } from '../../utils/validators';
 import '../../styles/dashboard.css';
 
-const BoardingPanel = () => {
+const BoardingPanel = ({ selectedFlight, setSelectedFlight }) => {
   const { currentUser } = useAuth();
   const { getFlightsByAirline, updateFlight, changeGate } = useFlights();
   const { getPassengersByFlight, boardPassenger } = usePassengers();
   const { areAllBagsLoaded, getUnloadedBags, arePassengerBagsAtGate, hasPassengerSecurityViolation, getPassengerBagsNotAtGate, getBagsByPassenger } = useBags();
   const { addMessage } = useMessages();
-  const [selectedFlight, setSelectedFlight] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showGateModal, setShowGateModal] = useState(false);

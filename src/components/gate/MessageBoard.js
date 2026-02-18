@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import useAuth from '../../hooks/useAuth';
 import useMessages from '../../hooks/useMessages';
-import useFlights from '../../hooks/useFlights';
 import useBags from '../../hooks/useBags';
 import usePassengers from '../../hooks/usePassengers';
 import ErrorMessage from '../common/ErrorMessage';
@@ -10,42 +9,32 @@ import { MESSAGE_BOARDS, MESSAGE_PRIORITY, PASSENGER_STATUS } from '../../utils/
 import { formatDate } from '../../utils/helpers';
 import '../../styles/dashboard.css';
 
-const MessageBoard = () => {
+const MessageBoard = ({ selectedFlight }) => {
   const { currentUser } = useAuth();
   const { getMessagesByBoard, addMessage } = useMessages();
-  const { getFlightsByAirline } = useFlights();
   const { areAllBagsLoaded } = useBags();
   const { getPassengersByFlight } = usePassengers();
-  const [selectedFlightId, setSelectedFlightId] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   const messages = getMessagesByBoard(MESSAGE_BOARDS.GATE);
-  const flights = getFlightsByAirline(currentUser.airline);
 
-  const handleNotifyDepartureReady = (e) => {
-    e.preventDefault();
+  const handleNotifyDepartureReady = () => {
     setError('');
     setSuccess('');
 
-    if (!selectedFlightId) {
-      setError('Please select a flight');
-      return;
-    }
-
-    const flight = flights.find(f => f.id === selectedFlightId);
-    if (!flight) {
-      setError('Flight not found');
+    if (!selectedFlight) {
+      setError('No flight selected. Please select a flight from the Boarding tab first.');
       return;
     }
 
     // Check if all passengers are boarded
-    const passengers = getPassengersByFlight(flight.id);
+    const passengers = getPassengersByFlight(selectedFlight.id);
     const allBoarded = passengers.every(p => p.status === PASSENGER_STATUS.BOARDED);
     const boardedCount = passengers.filter(p => p.status === PASSENGER_STATUS.BOARDED).length;
 
     // Check if all bags are loaded
-    const allBagsLoaded = areAllBagsLoaded(flight.id);
+    const allBagsLoaded = areAllBagsLoaded(selectedFlight.id);
 
     if (!allBoarded) {
       setError(`Not all passengers are boarded (${boardedCount}/${passengers.length}). All passengers must board before departure notification.`);
@@ -57,7 +46,7 @@ const MessageBoard = () => {
       return;
     }
 
-    const messageContent = `DEPARTURE READY - Flight ${flight.flightNumber} at Gate ${flight.gate}${flight.destination ? ` to ${flight.destination}` : ''} is ready for departure. All ${passengers.length} passenger(s) boarded and all bags loaded.`;
+    const messageContent = `DEPARTURE READY - Flight ${selectedFlight.flightNumber} at Gate ${selectedFlight.gate}${selectedFlight.destination ? ` to ${selectedFlight.destination}` : ''} is ready for departure. All ${passengers.length} passenger(s) boarded and all bags loaded.`;
 
     addMessage(MESSAGE_BOARDS.GATE, {
       author: currentUser.name,
@@ -66,8 +55,7 @@ const MessageBoard = () => {
       priority: MESSAGE_PRIORITY.HIGH
     });
 
-    setSuccess(`Administrator has been notified that flight ${flight.flightNumber} is ready for departure.`);
-    setSelectedFlightId('');
+    setSuccess(`Administrator has been notified that flight ${selectedFlight.flightNumber} is ready for departure.`);
   };
 
   return (
@@ -82,29 +70,21 @@ const MessageBoard = () => {
         <p className="text-muted mb-md">
           Send a notification to the administrator that a plane is ready for departure. All passengers must be boarded and all bags loaded.
         </p>
-        <form onSubmit={handleNotifyDepartureReady}>
-          <div className="form-group">
-            <label className="form-label">
-              Select Flight <span style={{ color: 'var(--danger-color)' }}> *</span>
-            </label>
-            <select
-              className="form-select"
-              value={selectedFlightId}
-              onChange={(e) => setSelectedFlightId(e.target.value)}
-              required
-            >
-              <option value="">Select a flight</option>
-              {flights.map(flight => (
-                <option key={flight.id} value={flight.id}>
-                  {flight.flightNumber} - Gate {flight.gate}{flight.destination ? ` - ${flight.destination}` : ''}
-                </option>
-              ))}
-            </select>
+        {selectedFlight ? (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-md)' }}>
+              <div><strong>Flight:</strong> {selectedFlight.flightNumber}</div>
+              <div><strong>Gate:</strong> {selectedFlight.gate}</div>
+              {selectedFlight.destination && <div><strong>Destination:</strong> {selectedFlight.destination}</div>}
+              <div><strong>Status:</strong> <span className={`status-badge status-${selectedFlight.status}`}>{selectedFlight.status}</span></div>
+            </div>
+            <button className="btn btn-success" onClick={handleNotifyDepartureReady}>
+              Notify Admin - Ready for Departure
+            </button>
           </div>
-          <button type="submit" className="btn btn-success">
-            Notify Admin - Ready for Departure
-          </button>
-        </form>
+        ) : (
+          <p className="text-muted">No flight selected. Please select a flight from the Boarding tab first.</p>
+        )}
       </div>
 
       <div className="card">
