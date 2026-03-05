@@ -19,7 +19,7 @@ const MessageBoard = ({ selectedFlight }) => {
 
   const messages = getMessagesByBoard(MESSAGE_BOARDS.GATE);
 
-  const handleNotifyDepartureReady = () => {
+  const handleNotifyDepartureReady = async () => {
     setError('');
     setSuccess('');
 
@@ -48,7 +48,7 @@ const MessageBoard = ({ selectedFlight }) => {
 
     const messageContent = `DEPARTURE READY - Flight ${selectedFlight.flightNumber} at Gate ${selectedFlight.gate}${selectedFlight.destination ? ` to ${selectedFlight.destination}` : ''} is ready for departure. All ${passengers.length} passenger(s) boarded and all bags loaded.`;
 
-    addMessage(MESSAGE_BOARDS.GATE, {
+    await addMessage(MESSAGE_BOARDS.GATE, {
       author: currentUser.name,
       airline: currentUser.airline,
       content: messageContent,

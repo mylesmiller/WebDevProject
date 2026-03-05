@@ -18,7 +18,7 @@ const FlightPassengers = () => {
     { header: 'Gate', accessor: 'gate' },
     { header: 'Destination', accessor: 'destination' },
     { header: 'Departure', render: (row) => formatDate(row.departureTime) },
-    { header: 'Passengers', render: (row) => row.passengerIds.length },
+    { header: 'Passengers', render: (row) => row.passengerIds ? row.passengerIds.length : 0 },
     {
       header: 'Checked In',
       render: (row) => {
@@ -62,7 +62,7 @@ const FlightPassengers = () => {
                     </span>
                   )
                 },
-                { header: 'Bags', render: (row) => row.bagIds.length }
+                { header: 'Bags', render: (row) => row.bagIds ? row.bagIds.length : 0 }
               ]}
               data={passengers}
               searchFields={['name', 'id', 'ticketNumber']}

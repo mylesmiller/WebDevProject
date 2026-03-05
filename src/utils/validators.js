@@ -129,8 +129,11 @@ export const validateFlightForm = (formData) => {
 export const validatePassengerForm = (formData) => {
   const errors = {};
 
-  const nameError = validateName(formData.name);
-  if (nameError) errors.name = nameError;
+  const firstnameError = validateName(formData.firstname);
+  if (firstnameError) errors.firstname = firstnameError;
+
+  const lastnameError = validateName(formData.lastname);
+  if (lastnameError) errors.lastname = lastnameError;
 
   const idError = validatePassengerId(formData.passengerId);
   if (idError) errors.passengerId = idError;
@@ -155,8 +158,11 @@ export const validatePassengerForm = (formData) => {
 export const validateStaffForm = (formData) => {
   const errors = {};
 
-  const nameError = validateName(formData.name);
-  if (nameError) errors.name = nameError;
+  const firstnameError = validateName(formData.firstname);
+  if (firstnameError) errors.firstname = firstnameError;
+
+  const lastnameError = validateName(formData.lastname);
+  if (lastnameError) errors.lastname = lastnameError;
 
   const roleError = validateRequired(formData.role, 'Role');
   if (roleError) errors.role = roleError;

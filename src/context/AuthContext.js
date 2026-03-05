@@ -1,7 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
-import StorageService from '../services/storageService';
-import { STORAGE_KEYS, ROLES } from '../utils/constants';
-import { verifyPassword } from '../utils/encryption';
+import apiService from '../services/apiService';
+import { ROLES } from '../utils/constants';
 
 export const AuthContext = createContext();
 
@@ -9,85 +8,32 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load current user from localStorage on mount
+  // Check session on mount
   useEffect(() => {
-    const savedUser = StorageService.get(STORAGE_KEYS.CURRENT_USER);
-    if (savedUser) {
-      setCurrentUser(savedUser);
-    }
-    setLoading(false);
+    apiService.get('/api/auth/me')
+      .then(user => setCurrentUser(user))
+      .catch(() => setCurrentUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
   // Staff/Admin login
-  const login = (username, password) => {
-    const users = StorageService.get(STORAGE_KEYS.USERS) || {};
-
-    // Find user by username
-    const user = Object.values(users).find(u => u.username === username);
-
-    if (!user) {
-      throw new Error('Invalid username or password');
-    }
-
-    // Verify password
-    if (!verifyPassword(password, user.password)) {
-      throw new Error('Invalid username or password');
-    }
-
-    // Don't allow passenger role to login via staff login
-    if (user.role === ROLES.PASSENGER) {
-      throw new Error('Passengers must use passenger login');
-    }
-
-    // Create session user object (without password)
-    const sessionUser = {
-      id: user.id,
-      username: user.username,
-      role: user.role,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      airline: user.airline,
-      mustChangePassword: user.mustChangePassword || false
-    };
-
+  const login = async (username, password) => {
+    const sessionUser = await apiService.post('/api/auth/login', { username, password });
     setCurrentUser(sessionUser);
-    StorageService.set(STORAGE_KEYS.CURRENT_USER, sessionUser);
-
     return sessionUser;
   };
 
   // Passenger login
-  const loginPassenger = (passengerId, ticketNumber) => {
-    const passengers = StorageService.get(STORAGE_KEYS.PASSENGERS) || {};
-
-    // Find passenger by ID and ticket number
-    const passenger = passengers[passengerId];
-
-    if (!passenger || passenger.ticketNumber !== ticketNumber) {
-      throw new Error('Invalid passenger ID or ticket number');
-    }
-
-    // Create session user object
-    const sessionUser = {
-      id: passenger.id,
-      role: ROLES.PASSENGER,
-      name: passenger.name,
-      ticketNumber: passenger.ticketNumber,
-      flightId: passenger.flightId,
-      passengerId: passenger.id
-    };
-
+  const loginPassenger = async (passengerId, ticketNumber) => {
+    const sessionUser = await apiService.post('/api/auth/login-passenger', { passengerId, ticketNumber });
     setCurrentUser(sessionUser);
-    StorageService.set(STORAGE_KEYS.CURRENT_USER, sessionUser);
-
     return sessionUser;
   };
 
   // Logout
-  const logout = () => {
+  const logout = async () => {
+    await apiService.post('/api/auth/logout', {});
     setCurrentUser(null);
-    StorageService.remove(STORAGE_KEYS.CURRENT_USER);
   };
 
   // Check if user has specific role
@@ -103,14 +49,7 @@ export const AuthProvider = ({ children }) => {
   // Update current user session (e.g., after password change)
   const updateCurrentUser = (updates) => {
     if (!currentUser) return;
-
-    const updatedUser = {
-      ...currentUser,
-      ...updates
-    };
-
-    setCurrentUser(updatedUser);
-    StorageService.set(STORAGE_KEYS.CURRENT_USER, updatedUser);
+    setCurrentUser(prev => ({ ...prev, ...updates }));
   };
 
   const value = {

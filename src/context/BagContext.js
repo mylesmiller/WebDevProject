@@ -1,197 +1,112 @@
-import React, { createContext, useState, useCallback } from 'react';
-import StorageService from '../services/storageService';
-import { STORAGE_KEYS, BAG_LOCATIONS, PASSENGER_STATUS } from '../utils/constants';
+import React, { createContext, useState, useCallback, useEffect } from 'react';
+import apiService from '../services/apiService';
+import { BAG_LOCATIONS } from '../utils/constants';
 
 export const BagContext = createContext();
 
 export const BagProvider = ({ children }) => {
-  const [bags, setBags] = useState(() => {
-    return StorageService.get(STORAGE_KEYS.BAGS) || {};
-  });
+  const [bags, setBags] = useState([]);
 
-  // Refresh bags from storage
-  const refreshBags = useCallback(() => {
-    const bagsData = StorageService.get(STORAGE_KEYS.BAGS) || {};
-    setBags(bagsData);
+  const loadBags = useCallback(async () => {
+    try {
+      const data = await apiService.get('/api/bags');
+      setBags(data);
+    } catch (err) {
+      // Not authenticated yet
+    }
   }, []);
+
+  useEffect(() => {
+    loadBags();
+  }, [loadBags]);
 
   // Get all bags
   const getAllBags = useCallback(() => {
-    return Object.values(bags);
+    return bags;
   }, [bags]);
 
   // Get bags by flight
   const getBagsByFlight = useCallback((flightId) => {
-    return Object.values(bags).filter(b => b.flightId === flightId);
+    return bags.filter(b => b.flightId === flightId);
   }, [bags]);
 
   // Get bags by passenger
   const getBagsByPassenger = useCallback((passengerId) => {
-    return Object.values(bags).filter(b => b.passengerId === passengerId);
+    return bags.filter(b => b.passengerId === passengerId);
   }, [bags]);
 
   // Get bag by ID
   const getBagById = useCallback((bagId) => {
-    return bags[bagId];
+    return bags.find(b => b.id === bagId);
   }, [bags]);
 
   // Get bags by location
   const getBagsByLocation = useCallback((location) => {
-    return Object.values(bags).filter(b => b.location === location);
+    return bags.filter(b => b.location === location);
   }, [bags]);
 
   // Add bag
-  const addBag = useCallback((bagData, staffId) => {
-    const bagsData = StorageService.get(STORAGE_KEYS.BAGS) || {};
-    const passengers = StorageService.get(STORAGE_KEYS.PASSENGERS) || {};
-
-    // Check if bag ID already exists
-    if (bagsData[bagData.bagId]) {
-      throw new Error('Bag ID already exists');
-    }
-
-    // Find passenger by ticket number
-    const passenger = Object.values(passengers).find(
-      p => p.ticketNumber === bagData.ticketNumber
-    );
-
-    if (!passenger) {
-      throw new Error('Passenger not found with this ticket number');
-    }
-
-    // Create new bag
-    const newBag = {
-      id: bagData.bagId,
-      ticketNumber: bagData.ticketNumber,
-      passengerId: passenger.id,
-      flightId: passenger.flightId,
-      location: BAG_LOCATIONS.CHECK_IN,
-      timeline: [
-        {
-          location: BAG_LOCATIONS.CHECK_IN,
-          timestamp: new Date().toISOString(),
-          handledBy: staffId
-        }
-      ]
-    };
-
-    // Save to storage
-    bagsData[newBag.id] = newBag;
-    StorageService.set(STORAGE_KEYS.BAGS, bagsData);
-    setBags({...bagsData});
-
-    // Update passenger bag list
-    passenger.bagIds.push(newBag.id);
-    passengers[passenger.id] = passenger;
-    StorageService.set(STORAGE_KEYS.PASSENGERS, passengers);
-
+  const addBag = useCallback(async (bagData) => {
+    const newBag = await apiService.post('/api/bags', bagData);
+    setBags(prev => [...prev, newBag]);
     return newBag;
   }, []);
 
   // Update bag location
-  const updateBagLocation = useCallback((bagId, location, staffId) => {
-    const bagsData = StorageService.get(STORAGE_KEYS.BAGS) || {};
-    const passengers = StorageService.get(STORAGE_KEYS.PASSENGERS) || {};
-
-    if (!bagsData[bagId]) {
-      throw new Error('Bag not found');
-    }
-
-    const bag = bagsData[bagId];
-
-    // When loading a bag, verify the passenger has boarded
-    if (location === BAG_LOCATIONS.LOADED) {
-      const passenger = passengers[bag.passengerId];
-      if (!passenger || passenger.status !== PASSENGER_STATUS.BOARDED) {
-        throw new Error('Cannot load bag - passenger has not boarded the plane yet');
-      }
-    }
-
-    // Update location and add to timeline
-    bag.location = location;
-    bag.timeline.push({
-      location,
-      timestamp: new Date().toISOString(),
-      handledBy: staffId
-    });
-
-    bagsData[bagId] = bag;
-    StorageService.set(STORAGE_KEYS.BAGS, bagsData);
-    setBags({...bagsData});
-
-    return bag;
+  const updateBagLocation = useCallback(async (bagId, location) => {
+    const updated = await apiService.put(`/api/bags/${bagId}/location`, { location });
+    setBags(prev => prev.map(b => b.id === bagId ? updated : b));
+    return updated;
   }, []);
 
   // Remove bag
-  const removeBag = useCallback((bagId) => {
-    const bagsData = StorageService.get(STORAGE_KEYS.BAGS) || {};
-    const passengers = StorageService.get(STORAGE_KEYS.PASSENGERS) || {};
-
-    if (!bagsData[bagId]) {
-      throw new Error('Bag not found');
-    }
-
-    const bag = bagsData[bagId];
-
-    // Remove bag from passenger's bagIds array
-    const passenger = passengers[bag.passengerId];
-    if (passenger) {
-      passenger.bagIds = passenger.bagIds.filter(id => id !== bagId);
-      passengers[passenger.id] = passenger;
-      StorageService.set(STORAGE_KEYS.PASSENGERS, passengers);
-    }
-
-    // Remove bag from storage
-    delete bagsData[bagId];
-    StorageService.set(STORAGE_KEYS.BAGS, bagsData);
-    setBags({...bagsData});
+  const removeBag = useCallback(async (bagId) => {
+    await apiService.delete(`/api/bags/${bagId}`);
+    setBags(prev => prev.filter(b => b.id !== bagId));
   }, []);
 
   // Check if all bags for a flight are loaded
   const areAllBagsLoaded = useCallback((flightId) => {
-    const flightBags = Object.values(bags).filter(b => b.flightId === flightId);
-
-    if (flightBags.length === 0) {
-      return true; // No bags, consider as loaded
-    }
-
+    const flightBags = bags.filter(b => b.flightId === flightId);
+    if (flightBags.length === 0) return true;
     return flightBags.every(b => b.location === BAG_LOCATIONS.LOADED);
   }, [bags]);
 
   // Get bags not loaded for a flight
   const getUnloadedBags = useCallback((flightId) => {
-    return Object.values(bags).filter(
+    return bags.filter(
       b => b.flightId === flightId && b.location !== BAG_LOCATIONS.LOADED
     );
   }, [bags]);
 
-  // Check if all of a passenger's bags have arrived at the gate (or are already loaded)
+  // Check if all passenger bags at gate
   const arePassengerBagsAtGate = useCallback((passengerId) => {
-    const passengerBags = Object.values(bags).filter(b => b.passengerId === passengerId);
-
-    if (passengerBags.length === 0) {
-      return true; // No bags, passenger can board
-    }
-
+    const passengerBags = bags.filter(b => b.passengerId === passengerId);
+    if (passengerBags.length === 0) return true;
     return passengerBags.every(b =>
       b.location === BAG_LOCATIONS.GATE || b.location === BAG_LOCATIONS.LOADED
     );
   }, [bags]);
 
-  // Check if any of a passenger's bags have a security violation
+  // Check security violation
   const hasPassengerSecurityViolation = useCallback((passengerId) => {
-    const passengerBags = Object.values(bags).filter(b => b.passengerId === passengerId);
-    return passengerBags.some(b => b.location === BAG_LOCATIONS.SECURITY_VIOLATION);
+    return bags.filter(b => b.passengerId === passengerId)
+      .some(b => b.location === BAG_LOCATIONS.SECURITY_VIOLATION);
   }, [bags]);
 
-  // Get bags not yet at gate for a passenger
+  // Get bags not at gate
   const getPassengerBagsNotAtGate = useCallback((passengerId) => {
-    return Object.values(bags).filter(
+    return bags.filter(
       b => b.passengerId === passengerId &&
         b.location !== BAG_LOCATIONS.GATE &&
         b.location !== BAG_LOCATIONS.LOADED
     );
   }, [bags]);
+
+  // Refresh bags
+  const refreshBags = useCallback(async () => {
+    await loadBags();
+  }, [loadBags]);
 
   const value = {
     bags,

@@ -51,7 +51,7 @@ const AdminMessages = () => {
     setSuccess('');
   };
 
-  const handleRemovePassenger = () => {
+  const handleRemovePassenger = async () => {
     setError('');
     setSuccess('');
 
@@ -67,7 +67,7 @@ const AdminMessages = () => {
       const passenger = getPassengerById(passengerId);
       if (!passenger) {
         setError('Passenger not found or already removed');
-        deleteMessage(MESSAGE_BOARDS.AIRLINE, selectedMessage.id);
+        await deleteMessage(MESSAGE_BOARDS.AIRLINE, selectedMessage.id);
         setShowModal(false);
         setSelectedMessage(null);
         return;
@@ -86,8 +86,8 @@ const AdminMessages = () => {
         return;
       }
 
-      removePassenger(passengerId);
-      deleteMessage(MESSAGE_BOARDS.AIRLINE, selectedMessage.id);
+      await removePassenger(passengerId);
+      await deleteMessage(MESSAGE_BOARDS.AIRLINE, selectedMessage.id);
 
       setSuccess(`Passenger ${passenger.name} (ID: ${passengerId}) has been removed from the system.`);
       setShowModal(false);
@@ -106,7 +106,7 @@ const AdminMessages = () => {
     setDepartureToAcknowledge(message);
   };
 
-  const handleConfirmDeparture = () => {
+  const handleConfirmDeparture = async () => {
     const message = departureToAcknowledge;
     setDepartureToAcknowledge(null);
     setError('');
@@ -124,22 +124,22 @@ const AdminMessages = () => {
 
       if (!flight) {
         // Flight may have already been removed; just delete the message
-        deleteMessage(MESSAGE_BOARDS.GATE, message.id);
+        await deleteMessage(MESSAGE_BOARDS.GATE, message.id);
         setSuccess(`Departure acknowledged. Flight ${flightNumber} was already removed from the system.`);
         return;
       }
 
       // Remove all passengers on this flight (which cascades to remove their bags)
       const passengers = getPassengersByFlight(flight.id);
-      passengers.forEach(passenger => {
-        removePassenger(passenger.id);
-      });
+      for (const passenger of passengers) {
+        await removePassenger(passenger.id);
+      }
 
       // Remove the flight itself
-      removeFlight(flight.id);
+      await removeFlight(flight.id);
 
       // Delete the message
-      deleteMessage(MESSAGE_BOARDS.GATE, message.id);
+      await deleteMessage(MESSAGE_BOARDS.GATE, message.id);
 
       setSuccess(`Flight ${flightNumber} departed. Removed ${passengers.length} passenger(s) and their bags from the system.`);
     } catch (err) {

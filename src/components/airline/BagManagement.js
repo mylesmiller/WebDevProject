@@ -68,7 +68,7 @@ const BagManagement = () => {
     }
   };
 
-  const handleAddBag = (e) => {
+  const handleAddBag = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -82,7 +82,7 @@ const BagManagement = () => {
     }
 
     try {
-      const newBag = addBag({ bagId, ticketNumber: passenger.ticketNumber }, currentUser.id);
+      const newBag = await addBag({ bagId, ticketNumber: passenger.ticketNumber });
       setAddedBag(newBag);
       setSuccess(`Bag ${bagId} added successfully`);
       setBagId('');

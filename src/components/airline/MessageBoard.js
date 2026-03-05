@@ -24,7 +24,7 @@ const MessageBoard = () => {
   const messages = getAirlineMessages(currentUser.airline);
   const flights = getFlightsByAirline(currentUser.airline);
 
-  const handleSubmitRemovalRequest = (e) => {
+  const handleSubmitRemovalRequest = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -50,7 +50,7 @@ const MessageBoard = () => {
 
       const messageContent = `PASSENGER REMOVAL REQUEST - Passenger: ${passenger.name} (ID: ${passengerId}), Ticket: ${passenger.ticketNumber}, Flight: ${passengerFlight.flightNumber}. Reason: ${reason.trim()}`;
 
-      addMessage(MESSAGE_BOARDS.AIRLINE, {
+      await addMessage(MESSAGE_BOARDS.AIRLINE, {
         author: currentUser.name,
         airline: 'ADMIN',
         content: messageContent,

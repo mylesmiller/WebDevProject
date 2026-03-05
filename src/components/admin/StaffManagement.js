@@ -14,7 +14,8 @@ const StaffManagement = () => {
   const { getAllStaff, addStaff, removeStaff } = useStaff();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    firstname: '',
+    lastname: '',
     role: '',
     airline: '',
     email: '',
@@ -37,7 +38,7 @@ const StaffManagement = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -52,7 +53,7 @@ const StaffManagement = () => {
     }
 
     try {
-      const newStaff = addStaff(formData);
+      const newStaff = await addStaff(formData);
 
       // Show credentials (only shown once!)
       setCredentials({
@@ -62,7 +63,8 @@ const StaffManagement = () => {
 
       setSuccess('Staff member added successfully. Please save the credentials below!');
       setFormData({
-        name: '',
+        firstname: '',
+        lastname: '',
         role: '',
         airline: '',
         email: '',
@@ -82,9 +84,9 @@ const StaffManagement = () => {
     setDeleteDialog({ isOpen: true, staffId });
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     try {
-      removeStaff(deleteDialog.staffId);
+      await removeStaff(deleteDialog.staffId);
       setSuccess('Staff member removed successfully');
       setDeleteDialog({ isOpen: false, staffId: null });
     } catch (err) {
@@ -145,13 +147,23 @@ const StaffManagement = () => {
           <form onSubmit={handleSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}>
               <FormInput
-                label="Name"
-                name="name"
-                value={formData.name}
+                label="First Name"
+                name="firstname"
+                value={formData.firstname}
                 onChange={handleChange}
                 validator={validateName}
-                error={formErrors.name}
-                placeholder="e.g., John Doe"
+                error={formErrors.firstname}
+                placeholder="e.g., John"
+                required
+              />
+              <FormInput
+                label="Last Name"
+                name="lastname"
+                value={formData.lastname}
+                onChange={handleChange}
+                validator={validateName}
+                error={formErrors.lastname}
+                placeholder="e.g., Doe"
                 required
               />
               <div className="form-group">

@@ -1,105 +1,66 @@
-import React, { createContext, useState, useCallback } from 'react';
-import StorageService from '../services/storageService';
-import { STORAGE_KEYS } from '../utils/constants';
-import { generateUsername, generatePassword, generateUserId } from '../utils/generators';
-import { hashPassword } from '../utils/encryption';
+import React, { createContext, useState, useCallback, useEffect } from 'react';
+import apiService from '../services/apiService';
 
 export const StaffContext = createContext();
 
 export const StaffProvider = ({ children }) => {
-  const [staff, setStaff] = useState(() => {
-    return StorageService.get(STORAGE_KEYS.USERS) || {};
-  });
+  const [staff, setStaff] = useState([]);
 
-  // Refresh staff from storage
-  const refreshStaff = useCallback(() => {
-    const users = StorageService.get(STORAGE_KEYS.USERS) || {};
-    setStaff(users);
+  const loadStaff = useCallback(async () => {
+    try {
+      const data = await apiService.get('/api/staff');
+      setStaff(data);
+    } catch (err) {
+      // Not authenticated yet
+    }
   }, []);
+
+  useEffect(() => {
+    loadStaff();
+  }, [loadStaff]);
 
   // Get all staff members
   const getAllStaff = useCallback(() => {
-    return Object.values(staff);
+    return staff;
   }, [staff]);
 
   // Get staff by role
   const getStaffByRole = useCallback((role) => {
-    return Object.values(staff).filter(s => s.role === role);
+    return staff.filter(s => s.role === role);
   }, [staff]);
 
   // Get staff by airline
   const getStaffByAirline = useCallback((airline) => {
-    return Object.values(staff).filter(s => s.airline === airline);
+    return staff.filter(s => s.airline === airline);
   }, [staff]);
-
-  // Add staff member with auto-generated credentials
-  const addStaff = useCallback((staffData) => {
-    const users = StorageService.get(STORAGE_KEYS.USERS) || {};
-
-    // Generate username and password
-    const username = generateUsername(staffData.name, staffData.role);
-    const plainPassword = generatePassword();
-    const hashedPassword = hashPassword(plainPassword);
-
-    // Create new staff member
-    const newStaff = {
-      id: generateUserId(users),
-      username,
-      password: hashedPassword,
-      role: staffData.role,
-      name: staffData.name,
-      email: staffData.email,
-      phone: staffData.phone,
-      airline: staffData.airline || null,
-      mustChangePassword: true
-    };
-
-    // Save to storage
-    users[newStaff.id] = newStaff;
-    StorageService.set(STORAGE_KEYS.USERS, users);
-    setStaff(users);
-
-    // Return credentials (password in plain text, only shown once)
-    return {
-      ...newStaff,
-      plainPassword
-    };
-  }, []);
-
-  // Remove staff member
-  const removeStaff = useCallback((staffId) => {
-    const users = StorageService.get(STORAGE_KEYS.USERS) || {};
-
-    // Don't allow removing admin
-    if (users[staffId]?.role === 'admin') {
-      throw new Error('Cannot remove admin user');
-    }
-
-    delete users[staffId];
-    StorageService.set(STORAGE_KEYS.USERS, users);
-    setStaff(users);
-  }, []);
 
   // Get staff by ID
   const getStaffById = useCallback((staffId) => {
-    return staff[staffId];
+    return staff.find(s => s.id === staffId);
   }, [staff]);
 
-  // Change password
-  const changePassword = useCallback((staffId, newPassword) => {
-    const users = StorageService.get(STORAGE_KEYS.USERS) || {};
-
-    if (!users[staffId]) {
-      throw new Error('User not found');
-    }
-
-    const hashedPassword = hashPassword(newPassword);
-    users[staffId].password = hashedPassword;
-    users[staffId].mustChangePassword = false;
-
-    StorageService.set(STORAGE_KEYS.USERS, users);
-    setStaff(users);
+  // Add staff member
+  const addStaff = useCallback(async (staffData) => {
+    const result = await apiService.post('/api/staff', staffData);
+    setStaff(prev => [...prev, result]);
+    return result;
   }, []);
+
+  // Remove staff member
+  const removeStaff = useCallback(async (staffId) => {
+    await apiService.delete(`/api/staff/${staffId}`);
+    setStaff(prev => prev.filter(s => s.id !== staffId));
+  }, []);
+
+  // Change password
+  const changePassword = useCallback(async (staffId, newPassword) => {
+    await apiService.put('/api/auth/change-password', { newPassword });
+  }, []);
+
+  // Refresh staff
+  const refreshStaff = useCallback(async () => {
+    await loadStaff();
+  }, [loadStaff]);
 
   const value = {
     staff,

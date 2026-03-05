@@ -40,7 +40,7 @@ const FlightManagement = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -57,7 +57,7 @@ const FlightManagement = () => {
     try {
       const airline = extractAirlineCode(formData.flightNumber);
 
-      addFlight({
+      await addFlight({
         airline,
         flightNumber: formData.flightNumber.toUpperCase(),
         gate: formData.gate.toUpperCase(),
@@ -78,9 +78,9 @@ const FlightManagement = () => {
     setDeleteDialog({ isOpen: true, flightId });
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     try {
-      removeFlight(deleteDialog.flightId);
+      await removeFlight(deleteDialog.flightId);
       setSuccess('Flight removed successfully');
       setDeleteDialog({ isOpen: false, flightId: null });
     } catch (err) {
@@ -96,7 +96,7 @@ const FlightManagement = () => {
     setSuccess('');
   };
 
-  const confirmChangeGate = () => {
+  const confirmChangeGate = async () => {
     setError('');
     setSuccess('');
 
@@ -112,12 +112,12 @@ const FlightManagement = () => {
         return;
       }
 
-      const result = changeGate(gateChangeModal.flight.id, newGate.toUpperCase());
+      const result = await changeGate(gateChangeModal.flight.id, newGate.toUpperCase());
 
       // Send notification to ground staff
       const messageContent = `GATE CHANGE - Flight ${result.flight.flightNumber} gate changed from ${result.oldGate} to ${result.newGate}. Please update baggage routing accordingly.`;
 
-      addMessage(MESSAGE_BOARDS.GROUND, {
+      await addMessage(MESSAGE_BOARDS.GROUND, {
         author: 'System Administrator',
         content: messageContent,
         priority: MESSAGE_PRIORITY.HIGH
@@ -138,7 +138,7 @@ const FlightManagement = () => {
     { header: 'Destination', render: (row) => row.destination || '-' },
     { header: 'Departure', render: (row) => row.departureTime ? formatDate(row.departureTime) : '-' },
     { header: 'Status', render: (row) => <span className={`status-badge status-${row.status}`}>{row.status}</span> },
-    { header: 'Passengers', render: (row) => row.passengerIds.length },
+    { header: 'Passengers', render: (row) => row.passengerIds ? row.passengerIds.length : 0 },
     {
       header: 'Actions',
       render: (row) => (

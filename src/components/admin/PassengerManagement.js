@@ -22,7 +22,8 @@ const PassengerManagement = () => {
   const { getAllFlights } = useFlights();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    firstname: '',
+    lastname: '',
     passengerId: '',
     ticketNumber: '',
     flightId: '',
@@ -46,7 +47,7 @@ const PassengerManagement = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -61,10 +62,11 @@ const PassengerManagement = () => {
     }
 
     try {
-      addPassenger(formData);
+      await addPassenger(formData);
       setSuccess('Passenger added successfully');
       setFormData({
-        name: '',
+        firstname: '',
+        lastname: '',
         passengerId: '',
         ticketNumber: '',
         flightId: '',
@@ -82,9 +84,9 @@ const PassengerManagement = () => {
     setDeleteDialog({ isOpen: true, passengerId });
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     try {
-      removePassenger(deleteDialog.passengerId);
+      await removePassenger(deleteDialog.passengerId);
       setSuccess('Passenger removed successfully');
       setDeleteDialog({ isOpen: false, passengerId: null });
     } catch (err) {
@@ -108,7 +110,7 @@ const PassengerManagement = () => {
         {getPassengerStatusDisplayName(row.status)}
       </span>
     )},
-    { header: 'Bags', render: (row) => row.bagIds.length },
+    { header: 'Bags', render: (row) => row.bagIds ? row.bagIds.length : 0 },
     {
       header: 'Actions',
       render: (row) => (
@@ -137,13 +139,23 @@ const PassengerManagement = () => {
           <form onSubmit={handleSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}>
               <FormInput
-                label="Name"
-                name="name"
-                value={formData.name}
+                label="First Name"
+                name="firstname"
+                value={formData.firstname}
                 onChange={handleChange}
                 validator={validateName}
-                error={formErrors.name}
-                placeholder="e.g., John Smith"
+                error={formErrors.firstname}
+                placeholder="e.g., John"
+                required
+              />
+              <FormInput
+                label="Last Name"
+                name="lastname"
+                value={formData.lastname}
+                onChange={handleChange}
+                validator={validateName}
+                error={formErrors.lastname}
+                placeholder="e.g., Smith"
                 required
               />
               <FormInput

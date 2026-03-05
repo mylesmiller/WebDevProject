@@ -59,20 +59,20 @@ const CheckInPanel = () => {
     }
   };
 
-  const handleCheckIn = () => {
+  const handleCheckIn = async () => {
     setError('');
     setSuccess('');
 
     try {
-      checkInPassenger(passenger.id, currentUser.id);
+      const updated = await checkInPassenger(passenger.id);
       setSuccess('Passenger checked in successfully');
-      setPassenger({ ...passenger, status: PASSENGER_STATUS.CHECKED_IN });
+      setPassenger(updated);
     } catch (err) {
       setError(err.message);
     }
   };
 
-  const handleAddBag = (e) => {
+  const handleAddBag = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -85,7 +85,7 @@ const CheckInPanel = () => {
     }
 
     try {
-      addBag({ bagId, ticketNumber: passenger.ticketNumber }, currentUser.id);
+      await addBag({ bagId, ticketNumber: passenger.ticketNumber });
       setSuccess(`Bag ${bagId} added successfully`);
       setBagId('');
 

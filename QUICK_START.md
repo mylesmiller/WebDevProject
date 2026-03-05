@@ -4,6 +4,17 @@
 
 This is a complete, working airport baggage tracking system built with React. Here's everything you need to know to run and demo it.
 
+To start MySQL and run your app:      
+
+  1. Start MySQL:                                                                                                            
+  brew services start mysql
+                                                                                                                     
+  2. Seed the database (if not already done):               
+  npm run seed
+
+  3. Start both servers (Express backend + React frontend):
+  npm run dev
+
 ## Installation & Running
 
 1. **Install dependencies** (only needed once):

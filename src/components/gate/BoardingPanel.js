@@ -33,7 +33,7 @@ const BoardingPanel = ({ selectedFlight, setSelectedFlight }) => {
     setSuccess('');
   };
 
-  const handleBoardPassenger = (passengerId) => {
+  const handleBoardPassenger = async (passengerId) => {
     setError('');
     setSuccess('');
 
@@ -64,7 +64,7 @@ const BoardingPanel = ({ selectedFlight, setSelectedFlight }) => {
     }
 
     try {
-      boardPassenger(passengerId, currentUser.id);
+      await boardPassenger(passengerId);
       setSuccess('Passenger boarded successfully');
 
       // Refresh flight selection to update status
@@ -76,12 +76,12 @@ const BoardingPanel = ({ selectedFlight, setSelectedFlight }) => {
     }
   };
 
-  const handleUpdateFlightStatus = (status) => {
+  const handleUpdateFlightStatus = async (status) => {
     setError('');
     setSuccess('');
 
     try {
-      updateFlight(selectedFlight.id, { status });
+      await updateFlight(selectedFlight.id, { status });
       setSuccess(`Flight status updated to ${status}`);
 
       // Refresh flight selection
@@ -99,7 +99,7 @@ const BoardingPanel = ({ selectedFlight, setSelectedFlight }) => {
     setError('');
   };
 
-  const handleChangeGate = () => {
+  const handleChangeGate = async () => {
     setError('');
     setSuccess('');
 
@@ -115,12 +115,12 @@ const BoardingPanel = ({ selectedFlight, setSelectedFlight }) => {
         return;
       }
 
-      const result = changeGate(selectedFlight.id, newGate.toUpperCase());
+      const result = await changeGate(selectedFlight.id, newGate.toUpperCase());
 
       // Send notification to ground staff
       const messageContent = `GATE CHANGE - Flight ${result.flight.flightNumber} gate changed from ${result.oldGate} to ${result.newGate}. Please update baggage routing accordingly.`;
 
-      addMessage(MESSAGE_BOARDS.GROUND, {
+      await addMessage(MESSAGE_BOARDS.GROUND, {
         author: currentUser.name,
         content: messageContent,
         priority: MESSAGE_PRIORITY.HIGH
@@ -253,7 +253,7 @@ const BoardingPanel = ({ selectedFlight, setSelectedFlight }) => {
                     </span>
                   )
                 },
-                { header: 'Bags', render: (row) => row.bagIds.length },
+                { header: 'Bags', render: (row) => row.bagIds ? row.bagIds.length : 0 },
                 {
                   header: 'Bag Check',
                   render: (row) => {

@@ -39,12 +39,12 @@ const SecurityClearance = () => {
     setSuccess('');
   };
 
-  const handleClearBag = () => {
+  const handleClearBag = async () => {
     setError('');
     setSuccess('');
 
     try {
-      updateBagLocation(selectedBag.id, BAG_LOCATIONS.GATE, currentUser.id);
+      await updateBagLocation(selectedBag.id, BAG_LOCATIONS.GATE);
       setSuccess(`Bag ${selectedBag.id} cleared and sent to gate.`);
       setSelectedBag(null);
     } catch (err) {
@@ -52,7 +52,7 @@ const SecurityClearance = () => {
     }
   };
 
-  const handleSecurityViolation = () => {
+  const handleSecurityViolation = async () => {
     setError('');
     setSuccess('');
 
@@ -66,12 +66,12 @@ const SecurityClearance = () => {
       }
 
       // Update bag location to security violation
-      updateBagLocation(selectedBag.id, BAG_LOCATIONS.SECURITY_VIOLATION, currentUser.id);
+      await updateBagLocation(selectedBag.id, BAG_LOCATIONS.SECURITY_VIOLATION);
 
       // Send message to airline staff about security violation
       const messageContent = `SECURITY VIOLATION - Bag ID: ${selectedBag.id}, Passenger: ${passenger.name} (ID: ${passenger.id}), Ticket: ${passenger.ticketNumber}, Flight: ${flight.flightNumber}. Security violation detected during screening. Please remove passenger bags and notify admin to remove passenger.`;
 
-      addMessage(MESSAGE_BOARDS.AIRLINE, {
+      await addMessage(MESSAGE_BOARDS.AIRLINE, {
         author: currentUser.name,
         airline: flight.airline,
         content: messageContent,

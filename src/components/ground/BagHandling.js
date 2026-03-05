@@ -31,24 +31,20 @@ const BagHandling = () => {
     setSuccess('');
   };
 
-  const handleUpdateLocation = (newLocation) => {
+  const handleUpdateLocation = async (newLocation) => {
     setError('');
     setSuccess('');
 
     try {
-      updateBagLocation(selectedBag.id, newLocation, currentUser.id);
+      const updated = await updateBagLocation(selectedBag.id, newLocation);
       setSuccess(`Bag moved to ${getBagLocationDisplayName(newLocation)}`);
-
-      // Refresh bag selection
-      const updatedBags = getAllBags();
-      const updatedBag = updatedBags.find(b => b.id === selectedBag.id);
-      setSelectedBag(updatedBag);
+      setSelectedBag(updated);
     } catch (err) {
       setError(err.message);
     }
   };
 
-  const handleSecurityViolation = () => {
+  const handleSecurityViolation = async () => {
     setError('');
     setSuccess('');
 
@@ -63,12 +59,12 @@ const BagHandling = () => {
       }
 
       // Update bag location to security violation
-      updateBagLocation(selectedBag.id, BAG_LOCATIONS.SECURITY_VIOLATION, currentUser.id);
+      const updated = await updateBagLocation(selectedBag.id, BAG_LOCATIONS.SECURITY_VIOLATION);
 
       // Create high-priority message to airline staff
       const messageContent = `SECURITY VIOLATION - Bag ID: ${selectedBag.id}, Passenger: ${passenger.name} (ID: ${passenger.id}), Ticket: ${passenger.ticketNumber}, Flight: ${flight.flightNumber}. Please remove passenger and all associated bags from the system.`;
 
-      addMessage(MESSAGE_BOARDS.AIRLINE, {
+      await addMessage(MESSAGE_BOARDS.AIRLINE, {
         author: currentUser.name,
         airline: flight.airline,
         content: messageContent,
@@ -76,11 +72,7 @@ const BagHandling = () => {
       });
 
       setSuccess('Security violation flagged. Airline staff has been notified.');
-
-      // Refresh bag selection
-      const updatedBags = getAllBags();
-      const updatedBag = updatedBags.find(b => b.id === selectedBag.id);
-      setSelectedBag(updatedBag);
+      setSelectedBag(updated);
     } catch (err) {
       setError(err.message);
     }

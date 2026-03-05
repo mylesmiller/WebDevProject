@@ -37,7 +37,7 @@ const PassengerLogin = () => {
     }
 
     try {
-      loginPassenger(formData.passengerId, formData.ticketNumber);
+      await loginPassenger(formData.passengerId, formData.ticketNumber);
       navigate('/passenger');
     } catch (err) {
       setError(err.message);

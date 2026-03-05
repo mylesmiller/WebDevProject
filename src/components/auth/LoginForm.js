@@ -39,7 +39,7 @@ const LoginForm = () => {
     }
 
     try {
-      const user = login(formData.username, formData.password);
+      const user = await login(formData.username, formData.password);
 
       // Redirect based on role
       switch (user.role) {

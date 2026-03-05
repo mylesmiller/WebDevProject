@@ -1,28 +1,35 @@
-import React, { createContext, useState, useCallback } from 'react';
-import StorageService from '../services/storageService';
-import { STORAGE_KEYS, MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../utils/constants';
-import { generateMessageId } from '../utils/generators';
+import React, { createContext, useState, useCallback, useEffect } from 'react';
+import apiService from '../services/apiService';
 
 export const MessageContext = createContext();
 
 export const MessageProvider = ({ children }) => {
-  const [messages, setMessages] = useState(() => {
-    return StorageService.get(STORAGE_KEYS.MESSAGES) || {
-      airline: [],
-      gate: [],
-      ground: []
-    };
+  const [messages, setMessages] = useState({
+    airline: [],
+    gate: [],
+    ground: []
   });
 
-  // Refresh messages from storage
-  const refreshMessages = useCallback(() => {
-    const messagesData = StorageService.get(STORAGE_KEYS.MESSAGES) || {
-      airline: [],
-      gate: [],
-      ground: []
-    };
-    setMessages(messagesData);
+  const loadMessages = useCallback(async () => {
+    try {
+      const data = await apiService.get('/api/messages');
+      // Group by board_type
+      const grouped = { airline: [], gate: [], ground: [] };
+      data.forEach(m => {
+        const board = m.board_type || m.boardType;
+        if (grouped[board]) {
+          grouped[board].push(m);
+        }
+      });
+      setMessages(grouped);
+    } catch (err) {
+      // Not authenticated yet
+    }
   }, []);
+
+  useEffect(() => {
+    loadMessages();
+  }, [loadMessages]);
 
   // Get messages by board
   const getMessagesByBoard = useCallback((board) => {
@@ -35,48 +42,33 @@ export const MessageProvider = ({ children }) => {
   }, [messages]);
 
   // Add message
-  const addMessage = useCallback((board, messageData) => {
-    const messagesData = StorageService.get(STORAGE_KEYS.MESSAGES) || {
-      airline: [],
-      gate: [],
-      ground: []
-    };
+  const addMessage = useCallback(async (board, messageData) => {
+    const newMessage = await apiService.post('/api/messages', {
+      ...messageData,
+      boardType: board
+    });
 
-    const newMessage = {
-      id: generateMessageId(),
-      author: messageData.author,
-      airline: messageData.airline || null,
-      content: messageData.content,
-      timestamp: new Date().toISOString(),
-      priority: messageData.priority || MESSAGE_PRIORITY.NORMAL
-    };
-
-    if (!messagesData[board]) {
-      messagesData[board] = [];
-    }
-
-    messagesData[board].unshift(newMessage); // Add to beginning
-
-    StorageService.set(STORAGE_KEYS.MESSAGES, messagesData);
-    setMessages(messagesData);
+    setMessages(prev => ({
+      ...prev,
+      [board]: [newMessage, ...(prev[board] || [])]
+    }));
 
     return newMessage;
   }, []);
 
   // Delete message
-  const deleteMessage = useCallback((board, messageId) => {
-    const messagesData = StorageService.get(STORAGE_KEYS.MESSAGES) || {
-      airline: [],
-      gate: [],
-      ground: []
-    };
-
-    if (messagesData[board]) {
-      messagesData[board] = messagesData[board].filter(m => m.id !== messageId);
-      StorageService.set(STORAGE_KEYS.MESSAGES, messagesData);
-      setMessages(messagesData);
-    }
+  const deleteMessage = useCallback(async (board, messageId) => {
+    await apiService.delete(`/api/messages/${messageId}`);
+    setMessages(prev => ({
+      ...prev,
+      [board]: (prev[board] || []).filter(m => m.id !== messageId)
+    }));
   }, []);
+
+  // Refresh messages
+  const refreshMessages = useCallback(async () => {
+    await loadMessages();
+  }, [loadMessages]);
 
   const value = {
     messages,

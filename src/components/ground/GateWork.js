@@ -75,7 +75,7 @@ const GateWork = () => {
     ? getAllBags().filter(b => b.flightId === selectedFlight.id && b.location === BAG_LOCATIONS.LOADED)
     : [];
 
-  const handleLoadBag = (bag) => {
+  const handleLoadBag = async (bag) => {
     setError('');
     setSuccess('');
 
@@ -92,7 +92,7 @@ const GateWork = () => {
         return;
       }
 
-      updateBagLocation(bag.id, BAG_LOCATIONS.LOADED, currentUser.id);
+      await updateBagLocation(bag.id, BAG_LOCATIONS.LOADED);
       setSuccess(`Bag ${bag.id} loaded onto aircraft for passenger ${passenger.name}.`);
     } catch (err) {
       setError(err.message);

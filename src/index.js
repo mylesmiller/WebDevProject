@@ -3,10 +3,6 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { initializeData } from './services/dataService';
-
-// Initialize seed data if not already present
-initializeData();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

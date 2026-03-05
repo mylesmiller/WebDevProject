@@ -6,9 +6,6 @@ import FormInput from '../common/FormInput';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
 import { validatePassword } from '../../utils/validators';
-import { verifyPassword } from '../../utils/encryption';
-import { STORAGE_KEYS } from '../../utils/constants';
-import StorageService from '../../services/storageService';
 import '../../styles/forms.css';
 
 const ChangePassword = ({ isForced = false }) => {
@@ -27,7 +24,6 @@ const ChangePassword = ({ isForced = false }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -57,7 +53,7 @@ const ChangePassword = ({ isForced = false }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -65,36 +61,18 @@ const ChangePassword = ({ isForced = false }) => {
     if (!validate()) return;
 
     try {
-      // Verify current password
-      const users = StorageService.get(STORAGE_KEYS.USERS) || {};
-      const user = users[currentUser.id];
+      await changePassword(currentUser.id, formData.newPassword);
 
-      if (!user) {
-        setError('User not found');
-        return;
-      }
-
-      if (!verifyPassword(formData.currentPassword, user.password)) {
-        setErrors({ currentPassword: 'Current password is incorrect' });
-        return;
-      }
-
-      // Change password
-      changePassword(currentUser.id, formData.newPassword);
-
-      // Update current user session
       updateCurrentUser({ mustChangePassword: false });
 
       setSuccess('Password changed successfully!');
 
-      // Clear form
       setFormData({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       });
 
-      // Redirect after successful change
       if (isForced) {
         setTimeout(() => {
           navigate('/');
@@ -105,10 +83,9 @@ const ChangePassword = ({ isForced = false }) => {
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (isForced) {
-      // If forced, logout instead of canceling
-      logout();
+      await logout();
       navigate('/login');
     } else {
       navigate(-1);

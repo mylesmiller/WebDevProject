@@ -44,7 +44,7 @@ const SecurityViolations = () => {
     setSuccess('');
   };
 
-  const handleRemovePassengerBags = () => {
+  const handleRemovePassengerBags = async () => {
     setError('');
     setSuccess('');
 
@@ -73,14 +73,14 @@ const SecurityViolations = () => {
       }
 
       // Remove all bags
-      passengerBags.forEach(bag => {
-        removeBag(bag.id);
-      });
+      for (const bag of passengerBags) {
+        await removeBag(bag.id);
+      }
 
       // Send message to Admin to remove passenger
       const adminMessage = `PASSENGER REMOVAL REQUEST - Passenger: ${passenger.name} (ID: ${passengerId}), Ticket: ${ticketNumber}. Reason: Security violation detected. All ${passengerBags.length} bag(s) have been removed. Please remove passenger from the system.`;
 
-      addMessage(MESSAGE_BOARDS.AIRLINE, {
+      await addMessage(MESSAGE_BOARDS.AIRLINE, {
         author: currentUser.name,
         airline: 'ADMIN',
         content: adminMessage,
@@ -88,7 +88,7 @@ const SecurityViolations = () => {
       });
 
       // Delete the security violation message
-      deleteMessage(MESSAGE_BOARDS.AIRLINE, selectedMessage.id);
+      await deleteMessage(MESSAGE_BOARDS.AIRLINE, selectedMessage.id);
 
       setSuccess(`Removed ${passengerBags.length} bag(s). Admin has been notified to remove passenger.`);
       setShowModal(false);
