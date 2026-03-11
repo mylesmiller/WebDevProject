@@ -1,7 +1,5 @@
 # Quick Start Guide - Airport Baggage Tracking System
 
-## For Your Class Project Submission
-
 This is a complete, working airport baggage tracking system built with React. Here's everything you need to know to run and demo it.
 
 To start MySQL and run your app:      

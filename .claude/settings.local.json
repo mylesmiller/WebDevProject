@@ -21,7 +21,18 @@
       "Bash(git reset:*)",
       "Bash(git stash:*)",
       "Bash(curl:*)",
-      "WebFetch(domain:localhost)"
+      "WebFetch(domain:localhost)",
+      "mcp__claude_ai_Draw_io__create_diagram",
+      "Bash(npm run:*)",
+      "Bash(mysql:*)",
+      "Bash(node:*)",
+      "Bash(lsof:*)",
+      "Bash(python3 -m json.tool)",
+      "Bash(__NEW_LINE_a3d1820557d4dd6b__ echo \"\")",
+      "Bash(__NEW_LINE_93df8c29309b0d47__ echo \"\")",
+      "Bash(__NEW_LINE_05de5ce413eaffb8__ echo \"\")",
+      "Bash(__NEW_LINE_3bd60b3e8ef41a03__ echo \"\")",
+      "Bash(__NEW_LINE_7eede5bc471362fc__ echo \"\")"
     ]
   }
 }
