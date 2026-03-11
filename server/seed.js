@@ -3,7 +3,6 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
-const path = require('path');
 
 const AIRLINES = {
   AA: 'American Airlines',
@@ -22,23 +21,16 @@ async function seed() {
   });
 
   try {
-    // Run schema
+    // Drop and recreate database for a clean slate
+    await connection.query('DROP DATABASE IF EXISTS airport_ops');
+    console.log('Dropped existing database.');
+
+    // Run schema (creates database and tables fresh)
     const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
     await connection.query(schema);
     console.log('Schema created.');
 
     await connection.query('USE airport_ops');
-
-    // Clear existing data in reverse FK order
-    await connection.query('DELETE FROM bag_timeline');
-    await connection.query('DELETE FROM bag');
-    await connection.query('DELETE FROM flight_passenger');
-    await connection.query('DELETE FROM passenger');
-    await connection.query('DELETE FROM flight');
-    await connection.query('DELETE FROM user_credentials');
-    await connection.query('DELETE FROM message');
-    await connection.query('DELETE FROM user');
-    console.log('Cleared existing data.');
 
     // Hash passwords
     const saltRounds = 10;
