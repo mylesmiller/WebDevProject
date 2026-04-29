@@ -40,7 +40,9 @@ export const getAirlineName = (code) => {
     'DL': 'Delta Air Lines',
     'UA': 'United Airlines',
     'SW': 'Southwest Airlines',
-    'BA': 'British Airways'
+    'BA': 'British Airways',
+    'F9': 'Frontier Airlines',
+    'FA': 'Frontier Airlines'
   };
   return airlines[code] || code;
 };

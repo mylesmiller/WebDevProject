@@ -50,9 +50,9 @@ export const PATTERNS = {
   BAG_ID: /^\d{6}$/,
   TICKET_NUMBER: /^\d{10}$/,
   PASSENGER_ID: /^\d{6}$/,
-  FLIGHT_NUMBER: /^[A-Z]{2}\d{4}$/,
-  AIRLINE_CODE: /^[A-Z]{2}$/,
-  USERNAME: /^[a-z]{2,}\d{2,}$/,
+  FLIGHT_NUMBER: /^[A-Z0-9]{2}\d{4}$/,
+  AIRLINE_CODE: /^[A-Z0-9]{2}$/,
+  USERNAME: /^[a-z]{2,}\d{2}$/,
   PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/,
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   PHONE: /^[1-9]\d{9}$/,
@@ -65,7 +65,9 @@ export const AIRLINES = [
   { code: 'DL', name: 'Delta Air Lines' },
   { code: 'UA', name: 'United Airlines' },
   { code: 'SW', name: 'Southwest Airlines' },
-  { code: 'BA', name: 'British Airways' }
+  { code: 'BA', name: 'British Airways' },
+  { code: 'F9', name: 'Frontier Airlines' },
+  { code: 'FA', name: 'Frontier Airlines' }
 ];
 
 // Storage keys

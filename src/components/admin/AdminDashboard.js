@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import Navbar from '../common/Navbar';
 import SystemOverview from './SystemOverview';
-import FlightManagement from './FlightManagement';
-import PassengerManagement from './PassengerManagement';
 import StaffManagement from './StaffManagement';
 import AdminMessages from './AdminMessages';
 import '../../styles/dashboard.css';
@@ -25,18 +23,6 @@ const AdminDashboard = () => {
             Overview
           </button>
           <button
-            className={`tab ${activeTab === 'flights' ? 'active' : ''}`}
-            onClick={() => setActiveTab('flights')}
-          >
-            Flights
-          </button>
-          <button
-            className={`tab ${activeTab === 'passengers' ? 'active' : ''}`}
-            onClick={() => setActiveTab('passengers')}
-          >
-            Passengers
-          </button>
-          <button
             className={`tab ${activeTab === 'staff' ? 'active' : ''}`}
             onClick={() => setActiveTab('staff')}
           >
@@ -52,8 +38,6 @@ const AdminDashboard = () => {
 
         <div>
           {activeTab === 'overview' && <SystemOverview />}
-          {activeTab === 'flights' && <FlightManagement />}
-          {activeTab === 'passengers' && <PassengerManagement />}
           {activeTab === 'staff' && <StaffManagement />}
           {activeTab === 'messages' && <AdminMessages />}
         </div>

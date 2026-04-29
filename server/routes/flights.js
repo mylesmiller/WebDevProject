@@ -1,6 +1,6 @@
 const express = require('express');
 const pool = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -57,8 +57,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Add flight
-router.post('/', async (req, res) => {
+// Add flight (airline staff only)
+router.post('/', requireRole('airline_staff'), async (req, res) => {
   try {
     const { flightNumber, gate, destination, departureTime, airlineName } = req.body;
     const airline = flightNumber.substring(0, 2);
@@ -93,8 +93,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update flight
-router.put('/:id', async (req, res) => {
+// Update flight (airline staff only)
+router.put('/:id', requireRole('airline_staff'), async (req, res) => {
   try {
     const { status, gate } = req.body;
     const flightId = req.params.id;
@@ -112,6 +112,20 @@ router.put('/:id', async (req, res) => {
       );
       if (conflict.length > 0) {
         return res.status(400).json({ error: `Gate ${gate} is already in use by another flight` });
+      }
+    }
+
+    // Validate status transitions
+    if (status !== undefined) {
+      const currentStatus = flights[0].status;
+      const validTransitions = {
+        'scheduled': ['boarding', 'cancelled'],
+        'boarding': ['departed', 'cancelled'],
+        'departed': ['cancelled'],
+        'cancelled': []
+      };
+      if (!validTransitions[currentStatus] || !validTransitions[currentStatus].includes(status)) {
+        return res.status(400).json({ error: `Invalid status transition from '${currentStatus}' to '${status}'` });
       }
     }
 
@@ -138,8 +152,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete flight
-router.delete('/:id', async (req, res) => {
+// Delete flight (airline staff only)
+router.delete('/:id', requireRole('airline_staff'), async (req, res) => {
   try {
     const [passengers] = await pool.query(
       'SELECT id FROM passenger WHERE flight_id = ?', [req.params.id]

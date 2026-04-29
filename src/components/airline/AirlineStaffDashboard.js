@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import Navbar from '../common/Navbar';
 import useAuth from '../../hooks/useAuth';
-import CheckInPanel from './CheckInPanel';
+import FlightManagement from './FlightManagement';
+import PassengerManagement from './PassengerManagement';
 import FlightPassengers from './FlightPassengers';
-import BagManagement from './BagManagement';
 import MessageBoard from './MessageBoard';
-import SecurityViolations from './SecurityViolations';
 import '../../styles/dashboard.css';
 
 const AirlineStaffDashboard = () => {
   const { currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('checkin');
+  const [activeTab, setActiveTab] = useState('flights');
 
   return (
     <div className="dashboard-container">
@@ -23,10 +22,10 @@ const AirlineStaffDashboard = () => {
 
         <div className="tabs">
           <button
-            className={`tab ${activeTab === 'checkin' ? 'active' : ''}`}
-            onClick={() => setActiveTab('checkin')}
+            className={`tab ${activeTab === 'flights' ? 'active' : ''}`}
+            onClick={() => setActiveTab('flights')}
           >
-            Check-In
+            Flights
           </button>
           <button
             className={`tab ${activeTab === 'passengers' ? 'active' : ''}`}
@@ -35,16 +34,10 @@ const AirlineStaffDashboard = () => {
             Passengers
           </button>
           <button
-            className={`tab ${activeTab === 'bags' ? 'active' : ''}`}
-            onClick={() => setActiveTab('bags')}
+            className={`tab ${activeTab === 'flightPassengers' ? 'active' : ''}`}
+            onClick={() => setActiveTab('flightPassengers')}
           >
-            Bag Management
-          </button>
-          <button
-            className={`tab ${activeTab === 'security' ? 'active' : ''}`}
-            onClick={() => setActiveTab('security')}
-          >
-            Security Violations
+            Flight Passengers
           </button>
           <button
             className={`tab ${activeTab === 'messages' ? 'active' : ''}`}
@@ -55,10 +48,9 @@ const AirlineStaffDashboard = () => {
         </div>
 
         <div>
-          {activeTab === 'checkin' && <CheckInPanel />}
-          {activeTab === 'passengers' && <FlightPassengers />}
-          {activeTab === 'bags' && <BagManagement />}
-          {activeTab === 'security' && <SecurityViolations />}
+          {activeTab === 'flights' && <FlightManagement />}
+          {activeTab === 'passengers' && <PassengerManagement />}
+          {activeTab === 'flightPassengers' && <FlightPassengers />}
           {activeTab === 'messages' && <MessageBoard />}
         </div>
       </div>

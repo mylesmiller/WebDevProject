@@ -1,6 +1,6 @@
 const express = require('express');
 const pool = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -66,8 +66,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Add passenger
-router.post('/', async (req, res) => {
+// Add passenger (airline staff only)
+router.post('/', requireRole('airline_staff'), async (req, res) => {
   try {
     const { passengerId, firstname, lastname, ticketNumber, flightId, email, phone } = req.body;
 
@@ -107,8 +107,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Delete passenger by ticket number
-router.delete('/ticket/:ticketNumber', async (req, res) => {
+// Delete passenger by ticket number (airline staff only)
+router.delete('/ticket/:ticketNumber', requireRole('airline_staff'), async (req, res) => {
   try {
     const [passengers] = await pool.query('SELECT * FROM passenger WHERE ticket_number = ?', [req.params.ticketNumber]);
     if (passengers.length === 0) {
@@ -138,8 +138,8 @@ router.delete('/ticket/:ticketNumber', async (req, res) => {
   }
 });
 
-// Delete passenger by ID
-router.delete('/:id', async (req, res) => {
+// Delete passenger by ID (airline staff only)
+router.delete('/:id', requireRole('airline_staff'), async (req, res) => {
   try {
     const [passengers] = await pool.query('SELECT * FROM passenger WHERE id = ?', [req.params.id]);
     if (passengers.length === 0) {
@@ -169,8 +169,8 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Check in passenger
-router.put('/:id/checkin', async (req, res) => {
+// Check in passenger (gate staff only)
+router.put('/:id/checkin', requireRole('gate_staff'), async (req, res) => {
   try {
     const [passengers] = await pool.query('SELECT * FROM passenger WHERE id = ?', [req.params.id]);
     if (passengers.length === 0) {
@@ -195,8 +195,8 @@ router.put('/:id/checkin', async (req, res) => {
   }
 });
 
-// Board passenger
-router.put('/:id/board', async (req, res) => {
+// Board passenger (gate staff only)
+router.put('/:id/board', requireRole('gate_staff'), async (req, res) => {
   try {
     const [passengers] = await pool.query('SELECT * FROM passenger WHERE id = ?', [req.params.id]);
     if (passengers.length === 0) {

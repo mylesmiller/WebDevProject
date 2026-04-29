@@ -1,6 +1,6 @@
 const express = require('express');
 const pool = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -61,8 +61,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Add bag
-router.post('/', async (req, res) => {
+// Add bag (ground staff only)
+router.post('/', requireRole('ground_staff'), async (req, res) => {
   try {
     const { bagId, ticketNumber } = req.body;
     const staffId = req.session.user.id;
@@ -104,8 +104,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update bag location
-router.put('/:id/location', async (req, res) => {
+// Update bag location (ground staff only)
+router.put('/:id/location', requireRole('ground_staff'), async (req, res) => {
   try {
     const { location } = req.body;
     const staffId = req.session.user.id;
@@ -144,8 +144,8 @@ router.put('/:id/location', async (req, res) => {
   }
 });
 
-// Delete bag
-router.delete('/:id', async (req, res) => {
+// Delete bag (ground staff only)
+router.delete('/:id', requireRole('ground_staff'), async (req, res) => {
   try {
     const [bags] = await pool.query('SELECT * FROM bag WHERE id = ?', [req.params.id]);
     if (bags.length === 0) {

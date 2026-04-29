@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const pool = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -39,16 +39,15 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Add staff
-router.post('/', async (req, res) => {
+// Add staff (admin only)
+router.post('/', requireRole('admin'), async (req, res) => {
   try {
     const { firstname, lastname, role, airline, email, phone } = req.body;
 
-    // Generate username from name
-    const first2 = (firstname || '').toLowerCase().substring(0, 2);
-    const last2 = (lastname || '').toLowerCase().substring(0, 2);
+    // Generate username: lowercase lastname + two random digits
+    const lastnameLower = (lastname || '').toLowerCase().replace(/[^a-z]/g, '');
     const digits = Math.floor(Math.random() * 90 + 10);
-    const username = `${first2}${last2}${digits}`;
+    const username = `${lastnameLower}${digits}`;
 
     // Generate random password
     const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -92,8 +91,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Delete staff
-router.delete('/:id', async (req, res) => {
+// Delete staff (admin only)
+router.delete('/:id', requireRole('admin'), async (req, res) => {
   try {
     const [users] = await pool.query('SELECT role, username FROM user WHERE id = ?', [req.params.id]);
     if (users.length === 0) {
