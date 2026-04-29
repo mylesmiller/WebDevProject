@@ -16,7 +16,28 @@ const bcrypt = require('bcrypt');
 const fs = require('fs');
 
 const STAFF_EMAIL = 'mylesmiller2014@gmail.com';
-const DEMO_PASSWORD = 'Pass1234';
+const POST_CHANGE_PASSWORD = 'Demo1234';
+
+// Per the spec, these users "must have logged into the system" before the demo.
+// They are simulated as having logged in once and changed their password to POST_CHANGE_PASSWORD.
+const REQUIRED_LOGGED_IN = new Set([
+  'Mylopolus', 'Louise', 'Reckon',     // AA Gate
+  'Guelph',                             // DL Gate
+  'Rangers',                            // FA Gate
+  'Ramos', 'Weiner', 'Cooper', 'Zhang'  // Ground
+]);
+
+function genPassword() {
+  const U = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const L = 'abcdefghijkmnpqrstuvwxyz';
+  const D = '23456789';
+  const all = U + L + D;
+  let pwd = U[Math.floor(Math.random() * U.length)] +
+            L[Math.floor(Math.random() * L.length)] +
+            D[Math.floor(Math.random() * D.length)];
+  for (let i = 0; i < 5; i++) pwd += all[Math.floor(Math.random() * all.length)];
+  return pwd.split('').sort(() => Math.random() - 0.5).join('');
+}
 
 const AIRLINES = {
   AA: 'American Airlines',
@@ -302,7 +323,7 @@ async function load() {
     console.log('Schema reset.\n');
 
     const adminHash = await bcrypt.hash('Admin123', 10);
-    const demoHash = await bcrypt.hash(DEMO_PASSWORD, 10);
+    const postChangeHash = await bcrypt.hash(POST_CHANGE_PASSWORD, 10);
 
     await conn.query(
       `INSERT INTO user (id, username, role, firstname, lastname, email, phone, airline) VALUES
@@ -317,24 +338,39 @@ async function load() {
     const usedUsernames = new Set(['admin']);
     const credentials = [];
 
-    // Insert staff users
+    // Insert staff users — each gets a uniquely generated password.
+    // "Required" instructor users are marked as already-logged-in (must_change_password=0,
+    // password = POST_CHANGE_PASSWORD) to satisfy the spec.
     async function insertStaff(role, list, hasAirline) {
       let i = 1;
       for (const row of list) {
         const [firstname, lastname, phone, airline] = hasAirline
           ? row
           : [row[0], row[1], row[2], null];
-        const username = genUsername(lastname, usedUsernames);
+        const lname = lastname.trim();
+        const username = genUsername(lname, usedUsernames);
         const id = `${role}_${String(i).padStart(3, '0')}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+        const isRequired = REQUIRED_LOGGED_IN.has(lname);
+        const generatedPwd = genPassword();
+        const hash = isRequired ? postChangeHash : await bcrypt.hash(generatedPwd, 10);
+        const mustChange = isRequired ? 0 : 1;
+
         await conn.query(
           `INSERT INTO user (id, username, role, firstname, lastname, email, phone, airline) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [id, username, role, firstname.trim(), lastname.trim(), STAFF_EMAIL, phone, airline]
+          [id, username, role, firstname.trim(), lname, STAFF_EMAIL, phone, airline]
         );
         await conn.query(
-          `INSERT INTO user_credentials (username, password_hash, must_change_password) VALUES (?, ?, 0)`,
-          [username, demoHash]
+          `INSERT INTO user_credentials (username, password_hash, must_change_password) VALUES (?, ?, ?)`,
+          [username, hash, mustChange]
         );
-        credentials.push({ role, name: `${firstname.trim()} ${lastname.trim()}`, username, airline: airline || '-' });
+        credentials.push({
+          role,
+          name: `${firstname.trim()} ${lname}`,
+          username,
+          airline: airline || '-',
+          password: isRequired ? `${POST_CHANGE_PASSWORD} (post-login change)` : generatedPwd,
+          loggedIn: isRequired
+        });
         i++;
       }
     }
@@ -431,21 +467,30 @@ async function load() {
     }
     console.log(`Inserted ${bagCount} bags with timelines.\n`);
 
-    console.log('='.repeat(80));
-    console.log('TEST DATA LOADED. STAFF CREDENTIALS:');
-    console.log('='.repeat(80));
-    console.log(`\nAdmin login:   username=admin   password=Admin123\n`);
-    console.log(`All other staff use password: ${DEMO_PASSWORD}\n`);
-    console.log('Username list:');
-    console.log('-'.repeat(80));
+    const lines = [];
+    const log = (s = '') => { console.log(s); lines.push(s); };
+    log('='.repeat(90));
+    log('TEST DATA LOADED — STAFF CREDENTIALS (keep this with you for the demo)');
+    log('='.repeat(90));
+    log(`\nAdmin login:   username=admin   password=Admin123\n`);
+    log(`Required instructor users (already "logged in", password changed): ${POST_CHANGE_PASSWORD}`);
+    log(`All other staff: auto-generated password shown below; must change on first login.\n`);
+
     const printed = { airline_staff: 'AIRLINE STAFF', gate_staff: 'GATE STAFF', ground_staff: 'GROUND STAFF' };
     for (const role of Object.keys(printed)) {
-      console.log(`\n${printed[role]}:`);
+      log('-'.repeat(90));
+      log(printed[role]);
+      log('-'.repeat(90));
       for (const c of credentials.filter(c => c.role === role)) {
-        console.log(`  ${c.name.padEnd(25)}  username: ${c.username.padEnd(15)}  airline: ${c.airline}`);
+        const tag = c.loggedIn ? '[LOGGED IN]' : '           ';
+        log(`  ${tag}  ${c.name.padEnd(22)}  user: ${c.username.padEnd(14)}  pass: ${String(c.password).padEnd(28)}  airline: ${c.airline}`);
       }
+      log('');
     }
-    console.log('\n' + '='.repeat(80));
+    log('='.repeat(90));
+
+    fs.writeFileSync(path.join(__dirname, '..', 'DEMO_CREDENTIALS.txt'), lines.join('\n'));
+    console.log('\nCredentials saved to DEMO_CREDENTIALS.txt');
   } catch (err) {
     console.error('Load error:', err);
     process.exit(1);

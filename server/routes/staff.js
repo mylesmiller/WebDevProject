@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const pool = require('../db');
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { sendCredentialsEmail } = require('../mailer');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -81,10 +82,25 @@ router.post('/', requireRole('admin'), async (req, res) => {
       [id]
     );
 
+    let emailStatus = { sent: false };
+    try {
+      emailStatus = await sendCredentialsEmail({
+        to: email,
+        name: `${firstname} ${lastname}`,
+        username,
+        password: plainPassword,
+        role
+      });
+    } catch (mailErr) {
+      console.error('[mailer] send failed:', mailErr.message);
+      emailStatus = { sent: false, error: mailErr.message };
+    }
+
     res.status(201).json({
       ...formatStaff(newUser[0]),
       plainPassword,
-      mustChangePassword: true
+      mustChangePassword: true,
+      emailStatus
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
