@@ -34,7 +34,7 @@ This is an **Airport Operations Management System** — a React-based web applic
 | gate | VARCHAR(10) | Unique among active flights |
 | destination | VARCHAR(100) | Optional |
 | departure_time | DATETIME | Optional |
-| status | ENUM | 'scheduled', 'boarding', 'departed', 'cancelled'; default 'scheduled' |
+| status | ENUM | 'boarding', 'departed'; default 'boarding' |
 
 ### 4. PASSENGER
 | Attribute | Type | Constraints |
@@ -109,6 +109,6 @@ This is an **Airport Operations Management System** — a React-based web applic
 - A passenger cannot board if their bags haven't reached the gate
 - A bag can only be marked "loaded" if its passenger has boarded
 - Bag location progresses: check-in → security → gate → loaded (or security-violation)
-- Flight status progresses: scheduled → boarding → departed (or cancelled)
-- Gate assignments must be unique among active (non-departed/cancelled) flights
+- Flight status progresses: boarding → departed
+- Gate assignments must be unique among active (non-departed) flights
 - Users with role `airline_staff` or `gate_staff` are scoped to a specific airline

@@ -1,228 +1,139 @@
-# Quick Start Guide - Airport Baggage Tracking System
+# Quick Start Guide — Airport Baggage Tracking System
 
-This is a complete, working airport baggage tracking system built with React. Here's everything you need to know to run and demo it.
-
-To start MySQL and run your app:      
-
-  1. Start MySQL:                                                                                                            
-  brew services start mysql
-                                                                                                                     
-  2. Seed the database (if not already done):               
-  npm run seed
-
-  3. Start both servers (Express backend + React frontend):
-  npm run dev
+A full-stack React + Express + MySQL app. Use this guide to run and demo it.
 
 ## Installation & Running
 
-1. **Install dependencies** (only needed once):
-```bash
-npm install
-```
+1. Install dependencies (only needed once):
+   ```bash
+   npm install
+   ```
 
-2. **Start the application**:
-```bash
-npm start
-```
+2. Start MySQL:
+   ```bash
+   brew services start mysql
+   ```
 
-3. The app will open in your browser at http://localhost:3000
+3. Seed the database:
+   ```bash
+   npm run seed
+   ```
 
-## Quick Demo Script (5-10 minutes)
+4. Start backend + frontend together:
+   ```bash
+   npm run dev
+   ```
 
-Follow this script to demonstrate all features:
+5. Open http://localhost:3000.
 
-### 1. Admin Demo (2 minutes)
+To reset all data, re-run `npm run seed` (it drops and recreates the database).
+
+## Quick Demo Script (5–10 minutes)
+
+### 1. Admin (2 min)
 ```
 Login: admin / Admin123
-- Show the overview page (statistics)
-- Add a new flight: AA9999, Gate A20, Destination "San Francisco"
-- Add a passenger: Name "Demo User", ID 999999, Ticket 9999999999, select the flight
-- Add a staff member (any role) - show auto-generated credentials
+- Show overview / statistics
+- Add flight: AA9999, Gate A20, Destination "San Francisco"
+- Add passenger: "Demo User", ID 999999, Ticket 9999999999, on the new flight
+- Add a staff member — show auto-generated credentials (also emailed)
 - Logout
 ```
 
-### 2. Airline Staff Demo (2 minutes)
+### 2. Airline Staff (2 min)
 ```
 Login: albr01 / Pass123
-- Show that only AA flights are visible
-- Search for passenger by ticket: 1234567890
+- Only AA flights visible
+- Search passenger by ticket: 1234567890
 - Check in the passenger
 - Add a bag: ID 100001
-- Post a message to airline board
+- Post an airline message
 - Logout
 ```
 
-### 3. Ground Staff Demo (2 minutes)
+### 3. Ground Staff (2 min)
 ```
 Login: grta05 / Pass345
-- Show all bags from all airlines
-- Select bag 100001
-- Move it through: Security → Gate
-- Show timeline
+- All bags from all airlines visible
+- Bag 100001: move Security → Gate
+- View timeline
 - Post a message
 - Logout
 ```
 
-### 4. Gate Staff Demo (2 minutes)
+### 4. Gate Staff (2 min)
 ```
 Login: evwi03 / Pass789
-- Select a flight
-- Show that bag verification prevents boarding
-- Board a checked-in passenger (ticket 1234567890)
+- Pick a flight
+- Bag verification blocks boarding until ready
+- Board passenger (ticket 1234567890)
 - Post a message
 - Logout
 ```
 
-### 5. Ground Staff - Complete Workflow (1 minute)
+### 5. Ground Staff — Load (1 min)
 ```
 Login: grta05 / Pass345
-- Find bag 100001
-- Now that passenger is boarded, load bag onto aircraft
+- Bag 100001: load onto aircraft (now allowed since passenger boarded)
 - Show completed timeline
 - Logout
 ```
 
-### 6. Passenger Demo (1 minute)
+### 6. Passenger (1 min)
 ```
-Go to Passenger Login
-Enter: ID 123456, Ticket 1234567890
-- Show flight info and gate
-- Show boarding status
-- Show bag tracking with visual progress bar
-- Show complete bag timeline
+Passenger Login: ID 123456, Ticket 1234567890
+- Flight info, gate
+- Boarding status
+- Bag tracking with progress bar and timeline
 ```
 
 ## Test Accounts Cheat Sheet
 
-### Quick Access Accounts
-- **Admin**: admin / Admin123
-- **Airline (AA)**: albr01 / Pass123
-- **Gate (AA)**: evwi03 / Pass789
-- **Ground**: grta05 / Pass345
-- **Passenger**: ID 123456, Ticket 1234567890
+- **Admin**: `admin` / `Admin123`
+- **Airline (AA)**: `albr01` / `Pass123`
+- **Gate (AA)**: `evwi03` / `Pass789`
+- **Ground**: `grta05` / `Pass345`
+- **Passenger**: ID `123456`, Ticket `1234567890`
 
-### All Available Accounts
-See README.md for complete list of test accounts.
+Full account list lives in README.md.
 
-## Key Features to Highlight
+## Key Features
 
-1. **Role-Based Access Control**
-   - Each role sees only what they should see
-   - Airline staff see only their airline
-   - Ground staff see all airlines
+1. Role-based access (airline/gate scoped to airline; ground sees all)
+2. Workflow validation (no boarding without check-in; no bag-load without boarding; one ticket per passenger)
+3. Auto-generated staff credentials (shown once, emailed via Nodemailer)
+4. Real-time bag tracking with timeline
+5. Per-role message boards with priority levels
+6. MySQL persistence — survives restarts; resettable via `npm run seed`
 
-2. **Workflow Validation**
-   - Can't board without checking in
-   - Can't load bags without passenger boarding
-   - One ticket per passenger enforced
+## Common Issues
 
-3. **Auto-Generated Credentials**
-   - Admin adds staff, system generates secure credentials
-   - Shown only once for security
+### "Module not found"
+Run `npm install`.
 
-4. **Real-Time Bag Tracking**
-   - Passengers can see exactly where their bags are
-   - Complete timeline of bag movement
-   - Visual progress indicator
-
-5. **Message Boards**
-   - Role-specific communication
-   - Priority levels
-   - Timestamped messages
-
-6. **Data Persistence**
-   - All data saved in browser
-   - Works across page refreshes
-   - Can demo by refreshing page
-
-## Common Issues & Solutions
-
-### Issue: "Module not found"
-**Solution**: Run `npm install` again
-
-### Issue: Port 3000 already in use
-**Solution**:
-- Kill other processes: `lsof -ti:3000 | xargs kill`
-- Or use different port: `PORT=3001 npm start`
-
-### Issue: Want to reset data
-**Solution**:
-- Open browser DevTools (F12)
-- Go to Application tab → Local Storage
-- Delete all items
-- Refresh page
-
-### Issue: Forgot test account credentials
-**Solution**: Check README.md or QUICK_START.md
-
-## File Structure for Reference
-
+### Port 3000 in use
 ```
-src/
-├── components/       # All UI components
-│   ├── admin/       # Admin dashboard
-│   ├── airline/     # Airline staff dashboard
-│   ├── gate/        # Gate staff dashboard
-│   ├── ground/      # Ground staff dashboard
-│   ├── passenger/   # Passenger dashboard
-│   ├── auth/        # Login components
-│   └── common/      # Reusable components
-├── context/         # State management
-├── hooks/           # Custom React hooks
-├── services/        # Data services
-├── utils/           # Validation & helpers
-└── styles/          # CSS files
+lsof -ti:3000 | xargs kill
+# or
+PORT=3001 npm start
 ```
+
+### Want to reset data
+Re-run `npm run seed` — it drops and recreates the MySQL database.
+
+### MySQL connection errors
+Make sure MySQL is running: `brew services start mysql`. Check `server/db.js` for connection settings.
 
 ## Validation Examples
 
-The system validates all inputs. Try these to see validation in action:
-
-**Flight Number**: Must be 2 letters + 4 digits
-- ✅ AA1234
-- ❌ A1234 (too short)
-- ❌ AAA1234 (too long)
-
-**Bag ID**: Must be 6 digits
-- ✅ 123456
-- ❌ 12345 (too short)
-- ❌ ABC123 (contains letters)
-
-**Password**: 6+ chars, 1 upper, 1 lower, 1 number
-- ✅ Pass123
-- ❌ pass123 (no uppercase)
-- ❌ PASS123 (no lowercase)
-- ❌ Password (no number)
+**Flight Number** (2 letters + 4 digits): `AA1234` ✅, `A1234` ❌, `AAA1234` ❌
+**Bag ID** (6 digits): `123456` ✅, `12345` ❌, `ABC123` ❌
+**Password** (6+ chars, 1 upper, 1 lower, 1 number): `Pass123` ✅, `pass123` ❌, `PASS123` ❌
 
 ## Presentation Tips
 
-1. **Start with Overview**: Show README.md to explain the project
-2. **Live Demo**: Follow the demo script above
-3. **Show Code**: Highlight key files like validators.js or BagContext.js
-4. **Explain Architecture**: Use AppProviders.js to show state management
-5. **Show Business Logic**: Demonstrate bag loading validation (can't load until passenger boards)
-
-## What Makes This Project Stand Out
-
-1. **Complete Implementation**: All 7 user roles, all workflows
-2. **Production-Quality Code**: Proper validation, error handling, confirmations
-3. **User Experience**: Clean UI, real-time feedback, intuitive navigation
-4. **Security Awareness**: Acknowledges frontend limitations, encrypts passwords
-5. **Documentation**: Comprehensive README and implementation summary
-
-## Need Help?
-
-- Check README.md for complete documentation
-- Check IMPLEMENTATION_SUMMARY.md for technical details
-- All validation rules are in src/utils/validators.js
-- All business logic is in src/context/ files
-
-## Pro Tips
-
-1. Open multiple browser windows to show different roles simultaneously
-2. Use browser DevTools to show localStorage data persistence
-3. Demonstrate mobile responsiveness by resizing browser
-4. Show the bag timeline feature - it's visually impressive!
-5. Point out the auto-generated username/password feature
-
-Good luck with your class presentation! 🚀
+1. Open multiple browser windows to show roles side-by-side
+2. Show the bag timeline — visually compelling
+3. Highlight auto-generated credentials with email delivery
+4. Demo `npm run seed` to show clean reset
+5. Walk the schema in `database-design.md` and `server/schema.sql`

@@ -1,11 +1,11 @@
 # Airport Baggage Tracking System
 
-A comprehensive frontend-only React application for managing airport baggage operations with multiple user roles, real-time tracking, and message board communications.
+A full-stack airport baggage tracking system with a React frontend and an Express + MySQL backend. Supports multiple staff roles, real-time bag tracking, and per-role message boards.
 
 ### Admin Dashboard
 - Add/remove flights with validation
 - Add/remove passengers (one ticket per passenger)
-- Add/remove staff with auto-generated credentials
+- Add/remove staff with auto-generated credentials and email delivery
 - View system statistics and all data
 
 ### Airline Staff Dashboard
@@ -27,7 +27,7 @@ A comprehensive frontend-only React application for managing airport baggage ope
 - Load bags onto aircraft (after passenger boarding verification)
 - Post and view ground staff messages
 
-### Passenger Dashboard (Bonus Feature)
+### Passenger Dashboard
 - View flight information and gate assignment
 - Check boarding status
 - Track bags with visual progress indicators
@@ -38,202 +38,124 @@ A comprehensive frontend-only React application for managing airport baggage ope
 ### Admin Account
 - **Username:** admin
 - **Password:** Admin123
-- **Access:** Full system administration
 
 ### Airline Staff
-- **Alice Brown (American Airlines - AA)**
-  - Username: albr01
-  - Password: Pass123
-  - Access: AA flights only
-
-- **Bob Johnson (Delta Air Lines - DL)**
-  - Username: bojohn02
-  - Password: Pass234
-  - Access: DL flights only
+- Alice Brown (AA): `albr01` / `Pass123`
+- Bob Johnson (DL): `bojohn02` / `Pass234`
 
 ### Gate Staff
-- **Eve Wilson (American Airlines - AA)**
-  - Username: evwi03
-  - Password: Pass789
-  - Access: AA flights only
-
-- **Frank Davis (Delta Air Lines - DL)**
-  - Username: frda04
-  - Password: Pass890
-  - Access: DL flights only
+- Eve Wilson (AA): `evwi03` / `Pass789`
+- Frank Davis (DL): `frda04` / `Pass890`
 
 ### Ground Staff
-- **Grace Taylor**
-  - Username: grta05
-  - Password: Pass345
-  - Access: All airlines' bags
-
-- **Henry Moore**
-  - Username: hemo06
-  - Password: Pass456
-  - Access: All airlines' bags
+- Grace Taylor: `grta05` / `Pass345`
+- Henry Moore: `hemo06` / `Pass456`
 
 ### Passenger Login
-Login using Passenger ID + Ticket Number:
-- **John Smith:** ID: 123456, Ticket: 1234567890
-- **Jane Doe:** ID: 123457, Ticket: 1234567891
-- **Mike Johnson:** ID: 234567, Ticket: 2345678901
+Login with Passenger ID + Ticket Number:
+- John Smith — ID: 123456, Ticket: 1234567890
+- Jane Doe — ID: 123457, Ticket: 1234567891
+- Mike Johnson — ID: 234567, Ticket: 2345678901
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js (v14 or higher)
-- npm or yarn
+- MySQL (local install via Homebrew or equivalent)
 
 ### Installation
 
 1. Install dependencies:
-```bash
-npm install
-```
+   ```bash
+   npm install
+   ```
 
-2. Start the development server:
-```bash
-npm start
-```
+2. Start MySQL:
+   ```bash
+   brew services start mysql
+   ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser
+3. Seed the database (creates schema and loads test data):
+   ```bash
+   npm run seed
+   ```
 
-## Usage Walkthrough
+4. Start the Express backend and React frontend together:
+   ```bash
+   npm run dev
+   ```
 
-### Complete Workflow Example
+5. Open [http://localhost:3000](http://localhost:3000).
 
-1. **Admin Setup**
-   - Login as admin (admin / Admin123)
-   - Add a new flight (e.g., AA1234, gate A12, destination "New York")
-   - Add a passenger (John Doe, ID 123456, ticket 1234567890) to the flight
-   - Add airline staff if needed
-   - Logout
-
-2. **Airline Staff Check-In**
-   - Login as airline staff (albr01 / Pass123)
-   - Search for passenger by ticket number (1234567890)
-   - Check in the passenger
-   - Create bag entries (e.g., bag ID 100001)
-   - View passengers on your flights
-   - Post message to airline board
-   - Logout
-
-3. **Ground Staff Bag Handling**
-   - Login as ground staff (grta05 / Pass345)
-   - Find the bag (100001)
-   - Move bag to security
-   - Move bag to gate
-   - (Wait for passenger to board first)
-   - Post message to ground board
-   - Logout
-
-4. **Gate Staff Boarding**
-   - Login as gate staff (evwi03 / Pass789)
-   - Select the flight
-   - Verify bags are at gate (not loaded yet)
-   - Board the passenger (John Doe)
-   - Post message to gate board
-   - Logout
-
-5. **Ground Staff Load Bags**
-   - Login as ground staff again
-   - Find bag 100001
-   - Load onto aircraft (now allowed since passenger is boarded)
-   - Logout
-
-6. **Gate Staff Complete Boarding**
-   - Login as gate staff
-   - Verify all bags loaded
-   - Mark flight as departed
-   - Logout
-
-7. **Passenger Tracking**
-   - Login as passenger (ID: 123456, Ticket: 1234567890)
-   - View flight information
-   - View boarding status
-   - Track bag location with timeline
-   - See complete bag journey
+To reset all data, re-run `npm run seed` — it drops and recreates the database.
 
 ## Validation Rules
 
-The system enforces all specified validation rules:
-- Bag ID: Exactly 6 digits
-- Ticket Number: Exactly 10 digits
-- Passenger ID: Exactly 6 digits
+- Bag ID: 6 digits
+- Ticket Number: 10 digits
+- Passenger ID: 6 digits
 - Flight Number: 2 uppercase letters + 4 digits (e.g., AA1234)
-- Username: Minimum 2 letters + minimum 2 digits (except admin)
-- Password: Minimum 6 characters, 1 uppercase, 1 lowercase, 1 number
-- Email: XXX@XXX.XXX format
-- Phone: 10 digits, first digit cannot be 0
-- Names: Minimum 2 letters
+- Username: minimum 2 letters + minimum 2 digits (except `admin`)
+- Password: minimum 6 characters, 1 uppercase, 1 lowercase, 1 number
+- Email: standard `XXX@XXX.XXX` format
+- Phone: 10 digits, first digit not 0
+- Names: minimum 2 letters
 
 ## Business Rules
 
-- One ticket per passenger (enforced)
+- One ticket per passenger
 - Flight must exist before adding passenger
-- Passenger must be checked-in before boarding
+- Passenger must be checked in before boarding
 - All bags must be loaded before marking flight as departed
 - Passenger must be boarded before loading their bags
-- Airline staff see only their airline's data
-- Ground staff see all airlines' bags
+- Airline and gate staff see only their airline's data; ground staff see all airlines' bags
 - All deletions require confirmation
-
-## Data Persistence
-
-Data is stored in browser localStorage and persists across:
-- Page refreshes
-- Browser restarts
-- Multiple tabs (synchronized)
-
-To reset data to initial state, clear browser localStorage or use browser dev tools.
-
-## Security Note
-
-This is a frontend-only educational project. All data is stored in browser localStorage, which is:
-- Accessible to anyone with browser access
-- Not encrypted in storage
-- Not suitable for real-world use
-- Passwords are hashed using SHA256 for demonstration only
 
 ## Tech Stack
 
-- React 19.2.4
-- React Router v6
-- crypto-js (password hashing)
-- Plain CSS (no frameworks)
-- localStorage (data persistence)
+- React 19 + React Router v6
+- Express + MySQL (mysql2)
+- bcrypt password hashing
+- Nodemailer (staff credential email)
+- Plain CSS
 
 ## Project Structure
 
 ```
-src/
+src/                    # React frontend
 ├── components/
-│   ├── common/          # Reusable UI components
-│   ├── auth/            # Login components
-│   ├── admin/           # Admin dashboard
-│   ├── airline/         # Airline staff dashboard
-│   ├── gate/            # Gate staff dashboard
-│   ├── ground/          # Ground staff dashboard
-│   └── passenger/       # Passenger dashboard
-├── context/             # React Context providers
-├── hooks/               # Custom React hooks
-├── services/            # Data services
-├── utils/               # Utilities and validators
-└── styles/              # CSS files
+│   ├── common/         # Reusable UI components
+│   ├── auth/           # Login components
+│   ├── admin/          # Admin dashboard
+│   ├── airline/        # Airline staff dashboard
+│   ├── gate/           # Gate staff dashboard
+│   ├── ground/         # Ground staff dashboard
+│   └── passenger/      # Passenger dashboard
+├── context/            # React Context providers
+├── hooks/              # Custom React hooks
+├── services/           # API client
+├── utils/              # Validators and helpers
+└── styles/             # CSS files
+
+server/                 # Express + MySQL backend
+├── index.js            # API entry point
+├── db.js               # MySQL connection pool
+├── schema.sql          # Database schema
+├── seed.js             # Schema reset / seed runner
+├── load-test-data.js   # Test data loader
+├── mailer.js           # Credential email delivery
+├── middleware/         # Auth middleware
+└── routes/             # REST endpoints
 ```
 
 ## Available Scripts
 
-### `npm start`
-Runs the app in development mode at [http://localhost:3000](http://localhost:3000)
-
-### `npm test`
-Launches the test runner
-
-### `npm run build`
-Builds the app for production to the `build` folder
+- `npm run dev` — runs Express backend and React frontend concurrently
+- `npm start` — React dev server only
+- `npm run seed` — drop, recreate, and seed the MySQL database
+- `npm test` — test runner
+- `npm run build` — production build
 
 ## License
 
-This project is created for educational purposes as a class project.
+Educational class project.
