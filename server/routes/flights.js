@@ -57,15 +57,15 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Add flight (airline staff only)
-router.post('/', requireRole('airline_staff'), async (req, res) => {
+// Add flight (admin only)
+router.post('/', requireRole('admin'), async (req, res) => {
   try {
     const { flightNumber, gate, destination, departureTime, airlineName } = req.body;
     const airline = flightNumber.substring(0, 2);
 
     // Check duplicate active flight number
     const [existing] = await pool.query(
-      'SELECT id FROM flight WHERE flight_number = ? AND status NOT IN ("departed","cancelled")',
+      'SELECT id FROM flight WHERE flight_number = ? AND status != "departed"',
       [flightNumber]
     );
     if (existing.length > 0) {
@@ -75,7 +75,7 @@ router.post('/', requireRole('airline_staff'), async (req, res) => {
     const id = `${flightNumber}_${Date.now()}`;
 
     await pool.query(
-      'INSERT INTO flight (id, flight_number, airline_name, gate, destination, departure_time, status) VALUES (?, ?, ?, ?, ?, ?, "scheduled")',
+      'INSERT INTO flight (id, flight_number, airline_name, gate, destination, departure_time, status) VALUES (?, ?, ?, ?, ?, ?, "boarding")',
       [id, flightNumber, airlineName || airline, gate, destination || null, departureTime || null]
     );
 
@@ -94,7 +94,7 @@ router.post('/', requireRole('airline_staff'), async (req, res) => {
 });
 
 // Update flight (airline staff only)
-router.put('/:id', requireRole('airline_staff'), async (req, res) => {
+router.put('/:id', requireRole('admin', 'gate_staff'), async (req, res) => {
   try {
     const { status, gate } = req.body;
     const flightId = req.params.id;
@@ -107,7 +107,7 @@ router.put('/:id', requireRole('airline_staff'), async (req, res) => {
     // If changing gate, check conflicts
     if (gate !== undefined) {
       const [conflict] = await pool.query(
-        'SELECT id FROM flight WHERE gate = ? AND id != ? AND status NOT IN ("departed","cancelled")',
+        'SELECT id FROM flight WHERE gate = ? AND id != ? AND status != "departed"',
         [gate, flightId]
       );
       if (conflict.length > 0) {
@@ -115,16 +115,9 @@ router.put('/:id', requireRole('airline_staff'), async (req, res) => {
       }
     }
 
-    // Validate status transitions
     if (status !== undefined) {
       const currentStatus = flights[0].status;
-      const validTransitions = {
-        'scheduled': ['boarding', 'cancelled'],
-        'boarding': ['departed', 'cancelled'],
-        'departed': ['cancelled'],
-        'cancelled': []
-      };
-      if (!validTransitions[currentStatus] || !validTransitions[currentStatus].includes(status)) {
+      if (!(currentStatus === 'boarding' && status === 'departed')) {
         return res.status(400).json({ error: `Invalid status transition from '${currentStatus}' to '${status}'` });
       }
     }
@@ -152,8 +145,8 @@ router.put('/:id', requireRole('airline_staff'), async (req, res) => {
   }
 });
 
-// Delete flight (airline staff only)
-router.delete('/:id', requireRole('airline_staff'), async (req, res) => {
+// Delete flight (admin only)
+router.delete('/:id', requireRole('admin'), async (req, res) => {
   try {
     const [passengers] = await pool.query(
       'SELECT id FROM passenger WHERE flight_id = ?', [req.params.id]

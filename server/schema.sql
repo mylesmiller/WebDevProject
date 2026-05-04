@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS flight (
   gate VARCHAR(10),
   destination VARCHAR(100),
   departure_time DATETIME,
-  status ENUM('scheduled','boarding','departed','cancelled') NOT NULL DEFAULT 'scheduled'
+  status ENUM('boarding','departed') NOT NULL DEFAULT 'boarding'
 );
 
 CREATE TABLE IF NOT EXISTS passenger (

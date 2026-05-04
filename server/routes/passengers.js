@@ -66,8 +66,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Add passenger (airline staff only)
-router.post('/', requireRole('airline_staff'), async (req, res) => {
+// Add passenger (admin only)
+router.post('/', requireRole('admin'), async (req, res) => {
   try {
     const { passengerId, firstname, lastname, ticketNumber, flightId, email, phone } = req.body;
 
@@ -107,8 +107,8 @@ router.post('/', requireRole('airline_staff'), async (req, res) => {
   }
 });
 
-// Delete passenger by ticket number (airline staff only)
-router.delete('/ticket/:ticketNumber', requireRole('airline_staff'), async (req, res) => {
+// Delete passenger by ticket number (admin only)
+router.delete('/ticket/:ticketNumber', requireRole('admin'), async (req, res) => {
   try {
     const [passengers] = await pool.query('SELECT * FROM passenger WHERE ticket_number = ?', [req.params.ticketNumber]);
     if (passengers.length === 0) {
@@ -138,8 +138,8 @@ router.delete('/ticket/:ticketNumber', requireRole('airline_staff'), async (req,
   }
 });
 
-// Delete passenger by ID (airline staff only)
-router.delete('/:id', requireRole('airline_staff'), async (req, res) => {
+// Delete passenger by ID (admin only)
+router.delete('/:id', requireRole('admin'), async (req, res) => {
   try {
     const [passengers] = await pool.query('SELECT * FROM passenger WHERE id = ?', [req.params.id]);
     if (passengers.length === 0) {
@@ -169,8 +169,8 @@ router.delete('/:id', requireRole('airline_staff'), async (req, res) => {
   }
 });
 
-// Check in passenger (gate staff only)
-router.put('/:id/checkin', requireRole('gate_staff'), async (req, res) => {
+// Check in passenger (airline staff only)
+router.put('/:id/checkin', requireRole('airline_staff'), async (req, res) => {
   try {
     const [passengers] = await pool.query('SELECT * FROM passenger WHERE id = ?', [req.params.id]);
     if (passengers.length === 0) {

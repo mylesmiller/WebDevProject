@@ -388,9 +388,9 @@ async function load() {
       if (status === 'Boarded') {
         flightStatuses[fn] = 'boarding';
       } else if (status === 'Checked-in' && !flightStatuses[fn]) {
-        flightStatuses[fn] = 'scheduled';
+        flightStatuses[fn] = 'boarding';
       } else if (!flightStatuses[fn]) {
-        flightStatuses[fn] = 'scheduled';
+        flightStatuses[fn] = 'boarding';
       }
     }
 
@@ -400,7 +400,7 @@ async function load() {
     for (const [flightNumber, destination, gate, airlineCode] of FLIGHTS) {
       const id = `${flightNumber}_${now}_${Math.floor(Math.random() * 1000)}`;
       const departure = new Date(now + (2 + flightTimeOffset * 0.25) * 60 * 60 * 1000);
-      const status = flightStatuses[flightNumber] || 'scheduled';
+      const status = flightStatuses[flightNumber] || 'boarding';
       await conn.query(
         `INSERT INTO flight (id, flight_number, airline_name, gate, destination, departure_time, status) VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [id, flightNumber, AIRLINES[airlineCode], gate, destination, departure, status]
