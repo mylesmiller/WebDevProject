@@ -115,27 +115,20 @@ const PassengerManagement = () => {
     { header: 'Bags', render: (row) => row.bagIds ? row.bagIds.length : 0 },
     {
       header: 'Actions',
-      render: (row) => (
-        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
-          Delete
-        </button>
-      )
+      render: () => <span className="text-muted">View only</span>
     }
   ];
 
   return (
     <div>
       <div className="section-header">
-        <h2>Passenger Management</h2>
-        <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-          {showForm ? 'Cancel' : 'Add Passenger'}
-        </button>
+        <h2>Passengers ({currentUser.airline})</h2>
       </div>
 
       <ErrorMessage message={error} />
       <SuccessMessage message={success} />
 
-      {showForm && (
+      {false && showForm && (
         <div className="card mb-lg">
           <h3 className="mb-md">Add New Passenger</h3>
           <form onSubmit={handleSubmit}>

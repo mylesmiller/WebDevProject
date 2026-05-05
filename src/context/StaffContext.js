@@ -17,6 +17,8 @@ export const StaffProvider = ({ children }) => {
 
   useEffect(() => {
     loadStaff();
+    const id = setInterval(loadStaff, 5000);
+    return () => clearInterval(id);
   }, [loadStaff]);
 
   // Get all staff members

@@ -2,7 +2,16 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require('express');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const pool = require('./db');
+
+const sessionStore = new MySQLStore({
+  createDatabaseTable: true,
+  schema: {
+    tableName: 'sessions',
+    columnNames: { session_id: 'session_id', expires: 'expires', data: 'data' }
+  }
+}, pool);
 
 const authRoutes = require('./routes/auth');
 const flightRoutes = require('./routes/flights');
@@ -18,6 +27,7 @@ app.use(express.json());
 
 app.use(session({
   secret: 'airport-ops-secret-key',
+  store: sessionStore,
   resave: false,
   saveUninitialized: false,
   cookie: {

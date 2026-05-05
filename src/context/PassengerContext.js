@@ -18,6 +18,8 @@ export const PassengerProvider = ({ children }) => {
 
   useEffect(() => {
     loadPassengers();
+    const id = setInterval(loadPassengers, 3000);
+    return () => clearInterval(id);
   }, [loadPassengers]);
 
   // Get all passengers

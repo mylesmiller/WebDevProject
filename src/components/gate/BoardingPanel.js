@@ -3,18 +3,20 @@ import useAuth from '../../hooks/useAuth';
 import useFlights from '../../hooks/useFlights';
 import usePassengers from '../../hooks/usePassengers';
 import useBags from '../../hooks/useBags';
+import useMessages from '../../hooks/useMessages';
 import Table from '../common/Table';
 import ErrorMessage from '../common/ErrorMessage';
 import SuccessMessage from '../common/SuccessMessage';
-import { PASSENGER_STATUS } from '../../utils/constants';
+import { PASSENGER_STATUS, FLIGHT_STATUS, MESSAGE_BOARDS, MESSAGE_PRIORITY } from '../../utils/constants';
 import { getPassengerStatusDisplayName, formatDate, getBagLocationDisplayName } from '../../utils/helpers';
 import '../../styles/dashboard.css';
 
 const BoardingPanel = ({ selectedFlight, setSelectedFlight }) => {
   const { currentUser } = useAuth();
-  const { getFlightsByAirline } = useFlights();
+  const { getFlightsByAirline, updateFlight } = useFlights();
   const { getPassengersByFlight, boardPassenger } = usePassengers();
   const { areAllBagsLoaded, getUnloadedBags, arePassengerBagsAtGate, hasPassengerSecurityViolation, getPassengerBagsNotAtGate, getBagsByPassenger } = useBags();
+  const { addMessage } = useMessages();
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -24,6 +26,42 @@ const BoardingPanel = ({ selectedFlight, setSelectedFlight }) => {
     setSelectedFlight(flight);
     setError('');
     setSuccess('');
+  };
+
+  const handleMarkReady = async () => {
+    setError('');
+    setSuccess('');
+    try {
+      const passengers = getPassengersByFlight(selectedFlight.id);
+      if (passengers.length === 0) {
+        setError('No passengers on this flight.');
+        return;
+      }
+      const notBoarded = passengers.filter(p => p.status !== PASSENGER_STATUS.BOARDED);
+      if (notBoarded.length > 0) {
+        setError(`Cannot mark ready: ${notBoarded.length} passenger(s) not yet boarded.`);
+        return;
+      }
+      if (!areAllBagsLoaded(selectedFlight.id)) {
+        setError(`Cannot mark ready: ${getUnloadedBags(selectedFlight.id).length} bag(s) not yet loaded.`);
+        return;
+      }
+
+      await updateFlight(selectedFlight.id, { status: FLIGHT_STATUS.DEPARTED });
+
+      await addMessage(MESSAGE_BOARDS.GATE, {
+        author: currentUser.name,
+        airline: selectedFlight.airline,
+        content: `DEPARTURE READY - Flight ${selectedFlight.flightNumber} (Gate ${selectedFlight.gate}) is fully boarded with all bags loaded and is ready to depart. Administrator: please remove the flight from the system.`,
+        priority: MESSAGE_PRIORITY.HIGH
+      });
+
+      setSuccess(`Flight ${selectedFlight.flightNumber} marked as departed. Administrator notified.`);
+      const updatedFlights = getFlightsByAirline(currentUser.airline);
+      setSelectedFlight(updatedFlights.find(f => f.id === selectedFlight.id));
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   const handleBoardPassenger = async (passengerId) => {
@@ -142,6 +180,31 @@ const BoardingPanel = ({ selectedFlight, setSelectedFlight }) => {
                 </div>
               )}
             </div>
+
+            {(() => {
+              const passengers = getPassengersByFlight(selectedFlight.id);
+              const allBoarded = passengers.length > 0 && passengers.every(p => p.status === PASSENGER_STATUS.BOARDED);
+              const allBagsLoaded = areAllBagsLoaded(selectedFlight.id);
+              const ready = allBoarded && allBagsLoaded && selectedFlight.status !== FLIGHT_STATUS.DEPARTED;
+              return (
+                <div className="mb-md">
+                  <button
+                    className="btn btn-success"
+                    onClick={handleMarkReady}
+                    disabled={!ready}
+                  >
+                    {selectedFlight.status === FLIGHT_STATUS.DEPARTED
+                      ? 'Flight Departed'
+                      : 'Mark Flight Ready for Departure'}
+                  </button>
+                  {!ready && selectedFlight.status !== FLIGHT_STATUS.DEPARTED && (
+                    <div className="text-muted" style={{ fontSize: 'var(--text-sm)', marginTop: 'var(--spacing-xs)' }}>
+                      Enabled once all passengers are boarded and all bags are loaded.
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
           </div>
 

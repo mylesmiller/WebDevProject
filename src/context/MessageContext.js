@@ -29,6 +29,8 @@ export const MessageProvider = ({ children }) => {
 
   useEffect(() => {
     loadMessages();
+    const id = setInterval(loadMessages, 3000);
+    return () => clearInterval(id);
   }, [loadMessages]);
 
   // Get messages by board

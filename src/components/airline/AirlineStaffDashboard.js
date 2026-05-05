@@ -4,12 +4,14 @@ import useAuth from '../../hooks/useAuth';
 import FlightManagement from './FlightManagement';
 import PassengerManagement from './PassengerManagement';
 import FlightPassengers from './FlightPassengers';
+import CheckInPanel from './CheckInPanel';
+import SecurityViolations from './SecurityViolations';
 import MessageBoard from './MessageBoard';
 import '../../styles/dashboard.css';
 
 const AirlineStaffDashboard = () => {
   const { currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('flights');
+  const [activeTab, setActiveTab] = useState('checkin');
 
   return (
     <div className="dashboard-container">
@@ -21,6 +23,12 @@ const AirlineStaffDashboard = () => {
         </h1>
 
         <div className="tabs">
+          <button
+            className={`tab ${activeTab === 'checkin' ? 'active' : ''}`}
+            onClick={() => setActiveTab('checkin')}
+          >
+            Check-In
+          </button>
           <button
             className={`tab ${activeTab === 'flights' ? 'active' : ''}`}
             onClick={() => setActiveTab('flights')}
@@ -40,6 +48,12 @@ const AirlineStaffDashboard = () => {
             Flight Passengers
           </button>
           <button
+            className={`tab ${activeTab === 'violations' ? 'active' : ''}`}
+            onClick={() => setActiveTab('violations')}
+          >
+            Security Violations
+          </button>
+          <button
             className={`tab ${activeTab === 'messages' ? 'active' : ''}`}
             onClick={() => setActiveTab('messages')}
           >
@@ -48,9 +62,11 @@ const AirlineStaffDashboard = () => {
         </div>
 
         <div>
+          {activeTab === 'checkin' && <CheckInPanel />}
           {activeTab === 'flights' && <FlightManagement />}
           {activeTab === 'passengers' && <PassengerManagement />}
           {activeTab === 'flightPassengers' && <FlightPassengers />}
+          {activeTab === 'violations' && <SecurityViolations />}
           {activeTab === 'messages' && <MessageBoard />}
         </div>
       </div>

@@ -18,6 +18,8 @@ export const FlightProvider = ({ children }) => {
 
   useEffect(() => {
     loadFlights();
+    const id = setInterval(loadFlights, 3000);
+    return () => clearInterval(id);
   }, [loadFlights]);
 
   // Get all flights

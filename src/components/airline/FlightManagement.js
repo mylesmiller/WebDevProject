@@ -150,47 +150,20 @@ const FlightManagement = () => {
     { header: 'Passengers', render: (row) => row.passengerIds ? row.passengerIds.length : 0 },
     {
       header: 'Actions',
-      render: (row) => (
-        <div style={{ display: 'flex', gap: 'var(--spacing-sm)', flexWrap: 'wrap' }}>
-          <button className="btn btn-primary btn-sm" onClick={() => handleChangeGate(row)}>
-            Change Gate
-          </button>
-          {row.status === FLIGHT_STATUS.SCHEDULED && (
-            <button className="btn btn-warning btn-sm" onClick={() => handleUpdateStatus(row.id, FLIGHT_STATUS.BOARDING)}>
-              Start Boarding
-            </button>
-          )}
-          {row.status === FLIGHT_STATUS.BOARDING && (
-            <button className="btn btn-success btn-sm" onClick={() => handleUpdateStatus(row.id, FLIGHT_STATUS.DEPARTED)}>
-              Mark Departed
-            </button>
-          )}
-          {row.status !== FLIGHT_STATUS.CANCELLED && row.status !== FLIGHT_STATUS.DEPARTED && (
-            <button className="btn btn-secondary btn-sm" onClick={() => handleUpdateStatus(row.id, FLIGHT_STATUS.CANCELLED)}>
-              Cancel
-            </button>
-          )}
-          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>
-            Delete
-          </button>
-        </div>
-      )
+      render: () => <span className="text-muted">View only</span>
     }
   ];
 
   return (
     <div>
       <div className="section-header">
-        <h2>Flight Management</h2>
-        <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-          {showForm ? 'Cancel' : 'Add Flight'}
-        </button>
+        <h2>Flights ({currentUser.airline})</h2>
       </div>
 
       <ErrorMessage message={error} />
       <SuccessMessage message={success} />
 
-      {showForm && (
+      {false && showForm && (
         <div className="card mb-lg">
           <h3 className="mb-md">Add New Flight</h3>
           <form onSubmit={handleSubmit}>

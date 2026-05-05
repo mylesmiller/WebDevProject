@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import Navbar from '../common/Navbar';
 import useAuth from '../../hooks/useAuth';
-import CheckInPanel from './CheckInPanel';
 import BoardingPanel from './BoardingPanel';
 import MessageBoard from './MessageBoard';
 import '../../styles/dashboard.css';
 
 const GateStaffDashboard = () => {
   const { currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('checkin');
+  const [activeTab, setActiveTab] = useState('boarding');
   const [selectedFlight, setSelectedFlight] = useState(null);
 
   return (
@@ -21,12 +20,6 @@ const GateStaffDashboard = () => {
         </h1>
 
         <div className="tabs">
-          <button
-            className={`tab ${activeTab === 'checkin' ? 'active' : ''}`}
-            onClick={() => setActiveTab('checkin')}
-          >
-            Check-In
-          </button>
           <button
             className={`tab ${activeTab === 'boarding' ? 'active' : ''}`}
             onClick={() => setActiveTab('boarding')}
@@ -42,7 +35,6 @@ const GateStaffDashboard = () => {
         </div>
 
         <div>
-          {activeTab === 'checkin' && <CheckInPanel />}
           {activeTab === 'boarding' && <BoardingPanel selectedFlight={selectedFlight} setSelectedFlight={setSelectedFlight} />}
           {activeTab === 'messages' && <MessageBoard selectedFlight={selectedFlight} />}
         </div>

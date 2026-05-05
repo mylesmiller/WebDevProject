@@ -18,6 +18,8 @@ export const BagProvider = ({ children }) => {
 
   useEffect(() => {
     loadBags();
+    const id = setInterval(loadBags, 3000);
+    return () => clearInterval(id);
   }, [loadBags]);
 
   // Get all bags
