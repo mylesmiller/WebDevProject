@@ -13,12 +13,30 @@ import '../../styles/dashboard.css';
 
 const BoardingPanel = ({ selectedFlight, setSelectedFlight }) => {
   const { currentUser } = useAuth();
-  const { getFlightsByAirline, updateFlight } = useFlights();
-  const { getPassengersByFlight, boardPassenger } = usePassengers();
-  const { areAllBagsLoaded, getUnloadedBags, arePassengerBagsAtGate, hasPassengerSecurityViolation, getPassengerBagsNotAtGate, getBagsByPassenger } = useBags();
+  const { getFlightsByAirline, updateFlight, refreshFlights } = useFlights();
+  const { getPassengersByFlight, boardPassenger, refreshPassengers } = usePassengers();
+  const { areAllBagsLoaded, getUnloadedBags, arePassengerBagsAtGate, hasPassengerSecurityViolation, getPassengerBagsNotAtGate, getBagsByPassenger, refreshBags } = useBags();
   const { addMessage } = useMessages();
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setError('');
+    try {
+      await Promise.all([refreshFlights(), refreshPassengers(), refreshBags()]);
+      if (selectedFlight) {
+        const updatedFlights = getFlightsByAirline(currentUser.airline);
+        const updated = updatedFlights.find(f => f.id === selectedFlight.id);
+        if (updated) setSelectedFlight(updated);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const flights = getFlightsByAirline(currentUser.airline);
 
@@ -143,7 +161,12 @@ const BoardingPanel = ({ selectedFlight, setSelectedFlight }) => {
       {selectedFlight && (
         <>
           <div className="card mb-lg">
-            <h3 className="mb-md">Flight: {selectedFlight.flightNumber}</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} className="mb-md">
+              <h3 style={{ margin: 0 }}>Flight: {selectedFlight.flightNumber}</h3>
+              <button className="btn btn-secondary btn-sm" onClick={handleRefresh} disabled={refreshing}>
+                {refreshing ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
               <div>
